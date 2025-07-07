@@ -1,0 +1,254 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* POS System Responsive Utilities */
+@layer base {
+  /* Improve touch targets on mobile */
+  @media (max-width: 640px) {
+    * {
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    button, a, input[type="button"], input[type="submit"] {
+      min-height: 44px;
+      min-width: 44px;
+      touch-action: manipulation;
+    }
+    
+    /* Prevent zoom on input focus */
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+  }
+  
+  /* Smooth scrolling for all devices */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Improve scrolling on mobile */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent horizontal overflow */
+  body {
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  /* Responsive grid utilities */
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  
+  .grid-responsive-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+  
+  .grid-responsive-stats {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4;
+  }
+  
+  /* Responsive card utilities */
+  .card-responsive {
+    @apply bg-white rounded-lg sm:rounded-xl shadow-sm border border-stone-200 p-3 sm:p-4 lg:p-6;
+  }
+  
+  .card-responsive:hover {
+    @apply shadow-md;
+  }
+  
+  /* Responsive text utilities */
+  .text-responsive-heading {
+    @apply text-xl sm:text-2xl lg:text-3xl font-bold;
+  }
+  
+  .text-responsive-subheading {
+    @apply text-lg sm:text-xl lg:text-2xl font-semibold;
+  }
+  
+  .text-responsive-body {
+    @apply text-sm sm:text-base;
+  }
+  
+  /* Responsive padding utilities */
+  .p-responsive {
+    @apply p-3 sm:p-4 lg:p-6;
+  }
+  
+  .px-responsive {
+    @apply px-3 sm:px-4 lg:px-6;
+  }
+  
+  .py-responsive {
+    @apply py-3 sm:py-4 lg:py-6;
+  }
+  
+  /* Responsive margin utilities */
+  .m-responsive {
+    @apply m-3 sm:m-4 lg:m-6;
+  }
+  
+  .mb-responsive {
+    @apply mb-3 sm:mb-4 lg:mb-6;
+  }
+  
+  /* Mobile-first button utilities */
+  .btn-mobile {
+    @apply w-full sm:w-auto px-4 py-3 sm:py-2 text-sm sm:text-base font-medium rounded-lg transition-all duration-200 touch-manipulation;
+  }
+  
+  .btn-mobile-primary {
+    @apply btn-mobile bg-stone-600 text-white hover:bg-stone-700 active:bg-stone-800;
+  }
+  
+  .btn-mobile-secondary {
+    @apply btn-mobile bg-white text-stone-700 border border-stone-300 hover:bg-stone-50 active:bg-stone-100;
+  }
+  
+  /* POS specific responsive utilities */
+  .pos-grid {
+    @apply grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6;
+  }
+  
+  .pos-scanner-section {
+    @apply bg-white rounded-lg sm:rounded-xl shadow-sm border border-stone-200 p-4 sm:p-6;
+  }
+  
+  .pos-cart-section {
+    @apply bg-white rounded-lg sm:rounded-xl shadow-sm border border-stone-200 p-4 sm:p-6 max-h-96 sm:max-h-full overflow-y-auto;
+  }
+  
+  /* Mobile navigation utilities */
+  .mobile-nav-item {
+    @apply flex items-center px-3 sm:px-4 py-3 sm:py-4 rounded-lg transition-all duration-150 text-sm sm:text-base touch-manipulation;
+  }
+  
+  .mobile-nav-item.active {
+    @apply bg-stone-100 text-stone-900 font-semibold shadow-sm;
+  }
+  
+  .mobile-nav-item:not(.active) {
+    @apply text-stone-600 hover:bg-stone-50 hover:text-stone-900 active:bg-stone-100;
+  }
+  
+  /* Form responsive utilities */
+  .form-input-responsive {
+    @apply w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-stone-500 transition-colors;
+  }
+  
+  .form-label-responsive {
+    @apply block text-xs sm:text-sm font-medium text-stone-700 mb-1 sm:mb-2;
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar for webkit browsers */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Safe area utilities for mobile devices */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Responsive breakpoint specific styles */
+@media (max-width: 640px) {
+  /* Mobile specific styles */
+  .mobile-only {
+    display: block !important;
+  }
+  
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  /* Improve form spacing on mobile */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  /* Mobile-friendly table */
+  .table-responsive {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Tablet specific styles */
+  .tablet-only {
+    display: block !important;
+  }
+  
+  .tablet-hidden {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  /* Desktop specific styles */
+  .desktop-only {
+    display: block !important;
+  }
+  
+  .desktop-hidden {
+    display: none !important;
+  }
+  
+  .mobile-only, .tablet-only {
+    display: none !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+}

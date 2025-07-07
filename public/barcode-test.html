@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .product-info {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .product-info h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .product-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .detail-item {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 14px;
+        }
+        .detail-value {
+            color: #333;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        .price-info {
+            background-color: #e8f5e8;
+            border: 2px solid #4CAF50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .original-price {
+            text-decoration: line-through;
+            color: #888;
+        }
+        .final-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+        .discount-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Barcode Scanner Test</h1>
+        
+        <div class="input-group">
+            <label for="barcode">Enter Barcode:</label>
+            <input type="text" id="barcode" placeholder="e.g., 2503071" />
+        </div>
+        
+        <button onclick="searchBarcode()">Search</button>
+        <button onclick="clearResults()">Clear</button>
+        
+        <div id="result"></div>
+        <div id="productInfo"></div>
+    </div>
+
+    <script>
+        // Sample barcodes for testing
+        const sampleBarcodes = ['2503071', '2503072', '2503073', '2503074', '2503075'];
+        
+        function searchBarcode() {
+            const barcode = document.getElementById('barcode').value.trim();
+            const resultDiv = document.getElementById('result');
+            const productDiv = document.getElementById('productInfo');
+            
+            if (!barcode) {
+                resultDiv.innerHTML = '<div class="result error">Please enter a barcode</div>';
+                return;
+            }
+            
+            // Clear previous results
+            resultDiv.innerHTML = '<div class="result">Searching...</div>';
+            productDiv.innerHTML = '';
+            
+            // Make API call
+            axios.get(`/api/test-barcode/${barcode}`)
+                .then(response => {
+                    console.log('API Response:', response.data);
+                    
+                    resultDiv.innerHTML = '<div class="result success">Item found successfully!</div>';
+                    displayProductInfo(response.data);
+                })
+                .catch(error => {
+                    console.error('API Error:', error);
+                    
+                    if (error.response && error.response.status === 404) {
+                        resultDiv.innerHTML = '<div class="result error">Item not found. Try one of these sample barcodes: ' + sampleBarcodes.join(', ') + '</div>';
+                    } else {
+                        resultDiv.innerHTML = '<div class="result error">Error: ' + (error.message || 'Unknown error') + '</div>';
+                    }
+                    
+                    productDiv.innerHTML = '';
+                });
+        }
+        
+        function displayProductInfo(data) {
+            const productDiv = document.getElementById('productInfo');
+            
+            const html = `
+                <div class="product-info">
+                    <h3>${data.dress?.name || 'Unknown Product'}</h3>
+                    
+                    <div class="product-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Collection</div>
+                            <div class="detail-value">${data.dress?.collection?.name || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">SKU</div>
+                            <div class="detail-value">${data.dress?.sku || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Size</div>
+                            <div class="detail-value">${data.size || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Barcode</div>
+                            <div class="detail-value">${data.barcode || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">${data.status || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Description</div>
+                            <div class="detail-value">${data.dress?.description || 'N/A'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="price-info">
+                        ${data.original_price !== data.final_price ? 
+                            `<div class="original-price">Original Price: PKR ${data.original_price}</div>` : 
+                            ''}
+                        <div class="final-price">Final Price: PKR ${data.final_price}</div>
+                        ${data.total_discount > 0 ? 
+                            `<div>You Save: PKR ${data.total_discount}</div>` : 
+                            ''}
+                    </div>
+                    
+                    ${data.discount_info ? 
+                        `<div class="discount-info">
+                            <strong>Discount Applied:</strong> ${data.discount_info}
+                        </div>` : 
+                        ''}
+                </div>
+            `;
+            
+            productDiv.innerHTML = html;
+        }
+        
+        function clearResults() {
+            document.getElementById('barcode').value = '';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('productInfo').innerHTML = '';
+        }
+        
+        // Allow Enter key to trigger search
+        document.getElementById('barcode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchBarcode();
+            }
+        });
+        
+        // Auto-focus on barcode input
+        document.getElementById('barcode').focus();
+    </script>
+</body>
+</html>

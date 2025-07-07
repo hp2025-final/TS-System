@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice Test - Updated</title>
+    <script type="module">
+        import { thermalInvoice } from './resources/js/services/ThermalInvoiceGenerator.js';
+        
+        // Test data
+        const testInvoiceData = {
+            sale: {
+                id: 1
+            },
+            items: [
+                {
+                    id: 1,
+                    barcode: '2503071',
+                    size: 'XS',
+                    final_price: 6650,
+                    total_discount: 350,
+                    dress: {
+                        name: 'Naz',
+                        sku: 'gz12345',
+                        sale_price: 7000,
+                        collection: {
+                            name: 'Ghazal'
+                        }
+                    }
+                }
+            ],
+            customer: {
+                name: 'Asad Ahmed',
+                phone: '+92 300 1234567'
+            },
+            paymentMethod: 'cash',
+            subtotal: 6650,
+            tax: 1197,
+            total: 7847,
+            totalDiscount: 350
+        };
+
+        // Test function
+        window.testInvoice = async function() {
+            console.log('Testing invoice generation with dynamic company data...');
+            try {
+                const result = await thermalInvoice.generateInvoice(testInvoiceData);
+                console.log('Invoice generation result:', result);
+            } catch (error) {
+                console.error('Invoice generation error:', error);
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Invoice Test Page - Updated</h1>
+    <p>This page tests the updated invoice generation service with:</p>
+    <ul>
+        <li>70mm content width (optimized for 80mm thermal paper)</li>
+        <li>Dynamic company data from company.php</li>
+        <li>Fixed layout with proper invoice title positioning</li>
+        <li>Improved CSS styling and responsive design</li>
+    </ul>
+    <button onclick="testInvoice()">Test Invoice Generation</button>
+    
+    <div style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+        <h3>Updated Invoice Layout:</h3>
+        <ul>
+            <li>✅ <strong>Header:</strong> Logo + Branch Name + Phone + Email only</li>
+            <li>✅ <strong>Moved to Footer:</strong> Website, Branch Address, Social Media</li>
+            <li>✅ <strong>Removed:</strong> Total Discount row (shown in item details)</li>
+            <li>✅ <strong>Clean Totals:</strong> Subtotal → Tax → TOTAL</li>
+            <li>✅ Left-aligned header with compact contact info</li>
+            <li>✅ Footer contains: Thank you message, website, address, social media</li>
+            <li>✅ 70mm content width optimized for 80mm thermal paper</li>
+        </ul>
+    </div>
+</body>
+</html>
