@@ -302,18 +302,23 @@
             <video ref="scannerVideo" class="w-full h-64 sm:h-80 object-cover" autoplay playsinline muted></video>
             <canvas ref="scannerCanvas" class="hidden"></canvas>
             
-            <!-- Mobile-optimized scanning overlay -->
+            <!-- Optimized scanning overlay for Code128 and QR codes -->
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div class="relative w-3/4 h-32 sm:h-40">
-                <!-- Corner indicators -->
+              <div class="relative w-4/5 h-20 sm:h-24">
+                <!-- Corner indicators optimized for linear barcodes -->
                 <div class="absolute top-0 left-0 w-8 h-8 border-t-3 border-l-3 border-red-400"></div>
                 <div class="absolute top-0 right-0 w-8 h-8 border-t-3 border-r-3 border-red-400"></div>
                 <div class="absolute bottom-0 left-0 w-8 h-8 border-b-3 border-l-3 border-red-400"></div>
                 <div class="absolute bottom-0 right-0 w-8 h-8 border-b-3 border-r-3 border-red-400"></div>
                 
-                <!-- Scanning line animation -->
+                <!-- Scanning line animation optimized for linear barcodes -->
                 <div v-if="isScanning" class="absolute inset-0 overflow-hidden">
                   <div class="scan-line w-full h-0.5 bg-red-400 opacity-80"></div>
+                </div>
+                
+                <!-- Center line guide for linear barcodes -->
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="w-full h-0.5 bg-red-300 opacity-40"></div>
                 </div>
               </div>
             </div>
@@ -336,14 +341,14 @@
                 </svg>
               </button>
               <div class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs">
-                Multi-format
+                Code128 & QR
               </div>
             </div>
             
             <!-- Instructions overlay -->
             <div class="absolute bottom-3 left-3 right-3 bg-black bg-opacity-70 text-white p-2 rounded text-center text-sm">
-              <div class="font-medium">Position barcode within the frame</div>
-              <div class="text-xs opacity-90">Hold steady for best results</div>
+              <div class="font-medium">Position barcode horizontally within the frame</div>
+              <div class="text-xs opacity-90">For Code128: align with center line | QR: fit in corners</div>
             </div>
           </div>
         </div>
@@ -358,7 +363,7 @@
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-blue-600">📱</span>
-                <span class="text-xs">Supports: QR, EAN13/8, Code128/39, UPC-A/E, DataMatrix</span>
+                <span class="text-xs">Supports: QR Codes & Code128 Barcodes</span>
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-orange-600">💡</span>
@@ -622,20 +627,11 @@ export default {
         if (!codeReader.value) {
           codeReader.value = new BrowserMultiFormatReader()
           
-          // Set decode hints for better performance and accuracy
+          // Set decode hints for Code128 and QR codes only
           const hints = new Map()
           hints.set(DecodeHintType.POSSIBLE_FORMATS, [
             BarcodeFormat.QR_CODE,
-            BarcodeFormat.EAN_13,
-            BarcodeFormat.EAN_8,
-            BarcodeFormat.CODE_128,
-            BarcodeFormat.CODE_39,
-            BarcodeFormat.UPC_A,
-            BarcodeFormat.UPC_E,
-            BarcodeFormat.CODABAR,
-            BarcodeFormat.ITF,
-            BarcodeFormat.RSS_14,
-            BarcodeFormat.DATA_MATRIX
+            BarcodeFormat.CODE_128
           ])
           hints.set(DecodeHintType.TRY_HARDER, true)
           hints.set(DecodeHintType.ALSO_INVERTED, true)
@@ -661,18 +657,19 @@ export default {
           }
         }
         
-        // Configure video constraints for better mobile scanning
+        // Configure video constraints optimized for Code128 barcodes and QR codes
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
         
         const constraints = {
           video: {
             deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
-            width: isMobile ? { ideal: 1920, max: 3840 } : { ideal: 1280, max: 1920 },
+            width: isMobile ? { ideal: 1920, max: 4096 } : { ideal: 1280, max: 1920 },
             height: isMobile ? { ideal: 1080, max: 2160 } : { ideal: 720, max: 1080 },
             facingMode: selectedDeviceId ? undefined : { ideal: 'environment' },
             focusMode: { ideal: 'continuous' },
             exposureMode: { ideal: 'continuous' },
             whiteBalanceMode: { ideal: 'continuous' },
+            zoom: { ideal: 1.0 }, // No zoom for better barcode reading
             torch: false // Disable torch initially
           }
         }
@@ -690,10 +687,13 @@ export default {
               const format = result.getBarcodeFormat()
               console.log('Scanned code:', scannedCode, 'Format:', format)
               
-              // Validate scanned code (more lenient for mobile)
-              if (scannedCode && scannedCode.trim() && scannedCode.length >= 3) {
-                // Set the scanned code to search term
-                searchTerm.value = scannedCode.trim()
+              // Validate scanned code (optimized for Code128 and QR codes)
+              if (scannedCode && scannedCode.trim() && scannedCode.length >= 1) {
+                // Clean the scanned code
+                let cleanCode = scannedCode.trim()
+                
+                // Set the cleaned code to search term
+                searchTerm.value = cleanCode
                 
                 // Provide haptic feedback on mobile devices
                 if (navigator.vibrate) {
@@ -707,8 +707,8 @@ export default {
                 searchByBarcode()
                 
                 // Show success message with format info
-                const formatName = format ? format.toString().replace('_', '-') : 'Barcode'
-                showCartMessage(`${formatName} scanned: ${scannedCode.substring(0, 10)}...`, 'success')
+                const formatName = format ? format.toString().replace('_', '-') : 'Code'
+                showCartMessage(`${formatName} scanned: ${cleanCode}`, 'success')
               }
               
             } else if (err && !(err instanceof NotFoundException)) {
