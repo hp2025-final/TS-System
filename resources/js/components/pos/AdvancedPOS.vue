@@ -286,26 +286,68 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          Barcode Scanner
+          Advanced Scanner
+          <span v-if="isScanning" class="ml-2 text-green-600 text-sm flex items-center gap-1">
+            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            Active
+          </span>
         </h3>
-        <div class="scanner-container">
-          <video ref="scannerVideo" class="w-full h-48 bg-gray-100 rounded-lg" autoplay playsinline></video>
+        <div class="scanner-container relative">
+          <video ref="scannerVideo" class="w-full h-48 bg-gray-100 rounded-lg" autoplay playsinline muted></video>
           <canvas ref="scannerCanvas" class="hidden"></canvas>
+          
+          <!-- Enhanced scanning overlay with corners -->
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div class="relative w-48 h-24">
+              <!-- Corner indicators -->
+              <div class="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-red-500"></div>
+              <div class="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-red-500"></div>
+              <div class="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-red-500"></div>
+              <div class="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-red-500"></div>
+              
+              <!-- Center crosshair -->
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-1 h-6 bg-red-400 opacity-60"></div>
+                <div class="w-6 h-1 bg-red-400 opacity-60 absolute"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Enhanced scanning status -->
+          <div v-if="isScanning" class="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+            <div class="w-2 h-2 bg-white rounded-full animate-ping"></div>
+            Scanning...
+          </div>
+          
+          <!-- Format indicator -->
+          <div class="absolute top-2 right-2 bg-blue-500 text-white px-2 py-1 rounded text-xs">
+            Multi-format
+          </div>
         </div>
         <div class="mt-4">
-          <p class="text-sm text-gray-600 mb-3">Position barcode within camera view</p>
+          <p class="text-sm text-gray-600 mb-3">
+            <span class="font-medium">✨ Advanced Auto-scanning:</span> Position any barcode/QR code within the frame
+            <br>
+            <span class="text-xs text-green-600 font-medium">
+              📱 Supports: QR, EAN13/8, Code128/39, UPC-A/E, DataMatrix, Codabar, ITF
+            </span>
+            <br>
+            <span class="text-xs text-blue-600">
+              💡 Tip: Hold steady for 1-2 seconds for best results
+            </span>
+          </p>
           <div class="flex gap-2">
             <button 
               @click="stopBarcodeScanner" 
               class="flex-1 px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors text-sm"
             >
-              Cancel
+              ❌ Cancel
             </button>
             <button 
               @click="captureBarcode" 
-              class="flex-1 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
+              class="flex-1 px-3 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors text-sm"
             >
-              Capture
+              ⌨️ Manual Entry
             </button>
           </div>
         </div>
@@ -318,6 +360,13 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { thermalInvoice } from '../../services/ThermalInvoiceGenerator.js'
+import { 
+  BrowserMultiFormatReader, 
+  NotFoundException, 
+  DecodeHintType, 
+  BarcodeFormat,
+  Result 
+} from '@zxing/library'
 
 export default {
   name: 'AdvancedPOS',
@@ -347,6 +396,10 @@ export default {
     const dressItems = ref([])
     const collections = ref([])
     const stream = ref(null)
+    
+    // ZXing barcode scanner
+    const codeReader = ref(null)
+    const isScanning = ref(false)
     
     // Computed properties
     const subtotal = computed(() => {
@@ -528,55 +581,156 @@ export default {
 
     const startBarcodeScanner = async () => {
       showScanner.value = true
+      isScanning.value = true
       
       try {
-        const constraints = {
-          video: {
-            facingMode: { ideal: 'environment' },
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+        // Initialize ZXing code reader with optimized settings
+        if (!codeReader.value) {
+          codeReader.value = new BrowserMultiFormatReader()
+          
+          // Set decode hints for better performance and accuracy
+          const hints = new Map()
+          hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+            BarcodeFormat.QR_CODE,
+            BarcodeFormat.EAN_13,
+            BarcodeFormat.EAN_8,
+            BarcodeFormat.CODE_128,
+            BarcodeFormat.CODE_39,
+            BarcodeFormat.UPC_A,
+            BarcodeFormat.UPC_E,
+            BarcodeFormat.CODABAR,
+            BarcodeFormat.ITF,
+            BarcodeFormat.RSS_14,
+            BarcodeFormat.DATA_MATRIX
+          ])
+          hints.set(DecodeHintType.TRY_HARDER, true)
+          hints.set(DecodeHintType.ALSO_INVERTED, true)
+          
+          codeReader.value.hints = hints
+        }
+        
+        // Get available video devices
+        const videoInputDevices = await codeReader.value.listVideoInputDevices()
+        console.log('Available cameras:', videoInputDevices.length)
+        
+        // Prefer back camera for mobile devices with better resolution
+        let selectedDeviceId = undefined
+        if (videoInputDevices.length > 1) {
+          const backCamera = videoInputDevices.find(device => 
+            device.label.toLowerCase().includes('back') || 
+            device.label.toLowerCase().includes('environment') ||
+            device.label.toLowerCase().includes('rear')
+          )
+          if (backCamera) {
+            selectedDeviceId = backCamera.deviceId
+            console.log('Using back camera:', backCamera.label)
           }
         }
         
-        stream.value = await navigator.mediaDevices.getUserMedia(constraints)
-        
-        if (scannerVideo.value) {
-          scannerVideo.value.srcObject = stream.value
-          scannerVideo.value.play()
+        // Configure video constraints for better scanning
+        const constraints = {
+          video: {
+            deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
+            width: { ideal: 1280, max: 1920 },
+            height: { ideal: 720, max: 1080 },
+            facingMode: selectedDeviceId ? undefined : { ideal: 'environment' },
+            focusMode: { ideal: 'continuous' },
+            exposureMode: { ideal: 'continuous' },
+            whiteBalanceMode: { ideal: 'continuous' }
+          }
         }
         
+        // Start decoding with optimized settings
+        await codeReader.value.decodeFromConstraints(
+          constraints,
+          scannerVideo.value,
+          (result, err) => {
+            if (result) {
+              // Successfully scanned a barcode/QR code
+              const scannedCode = result.getText()
+              const format = result.getBarcodeFormat()
+              console.log('Scanned code:', scannedCode, 'Format:', format)
+              
+              // Validate scanned code
+              if (scannedCode && scannedCode.trim()) {
+                // Set the scanned code to search term
+                searchTerm.value = scannedCode.trim()
+                
+                // Provide haptic feedback on mobile devices
+                if (navigator.vibrate) {
+                  navigator.vibrate([100, 50, 100]) // Short vibration pattern
+                }
+                
+                // Stop scanning and close modal
+                stopBarcodeScanner()
+                
+                // Trigger search
+                searchByBarcode()
+                
+                // Show success message with format info
+                const formatName = format ? format.toString() : 'Unknown'
+                showCartMessage(`${formatName} scanned successfully!`, 'success')
+              }
+              
+            } else if (err && !(err instanceof NotFoundException)) {
+              console.warn('Scanning error:', err)
+            }
+          }
+        )
+        
+        console.log('Scanner started successfully')
+        
       } catch (err) {
-        console.error('Error accessing camera:', err)
-        alert('Camera access required for barcode scanning. Please allow camera permissions.')
+        console.error('Error starting barcode scanner:', err)
+        let errorMessage = 'Failed to start camera. '
+        
+        if (err.name === 'NotAllowedError') {
+          errorMessage += 'Please allow camera access and try again.'
+        } else if (err.name === 'NotFoundError') {
+          errorMessage += 'No camera found on this device.'
+        } else if (err.name === 'NotSupportedError') {
+          errorMessage += 'Camera not supported in this browser.'
+        } else if (err.name === 'NotReadableError') {
+          errorMessage += 'Camera is being used by another application.'
+        } else {
+          errorMessage += 'Please ensure you\'re using HTTPS and have camera permissions.'
+        }
+        
+        alert(errorMessage)
         showScanner.value = false
+        isScanning.value = false
       }
     }
 
     const stopBarcodeScanner = () => {
       showScanner.value = false
+      isScanning.value = false
+      
+      // Stop ZXing scanner
+      if (codeReader.value) {
+        codeReader.value.reset()
+      }
+      
+      // Stop camera stream if exists
       if (stream.value) {
         stream.value.getTracks().forEach(track => track.stop())
         stream.value = null
       }
+      
+      // Clear video source
+      if (scannerVideo.value) {
+        scannerVideo.value.srcObject = null
+      }
     }
 
     const captureBarcode = () => {
-      if (!scannerVideo.value || !scannerCanvas.value) return
-      
-      const canvas = scannerCanvas.value
-      const video = scannerVideo.value
-      const context = canvas.getContext('2d')
-      
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      
-      context.drawImage(video, 0, 0, canvas.width, canvas.height)
-      
+      // Allow manual barcode entry as fallback
       const manualBarcode = prompt('Enter the barcode manually:')
-      if (manualBarcode) {
-        searchTerm.value = manualBarcode
+      if (manualBarcode && manualBarcode.trim()) {
+        searchTerm.value = manualBarcode.trim()
         stopBarcodeScanner()
         searchByBarcode()
+        showCartMessage('Manual barcode entered successfully!', 'success')
       }
     }
 
@@ -781,6 +935,23 @@ export default {
   position: relative;
   overflow: hidden;
   border-radius: 8px;
+}
+
+/* Scanner animations */
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.scan-line {
+  animation: scan-line 2s ease-in-out infinite;
+}
+
+/* Pulse animation for active status */
+@keyframes pulse-grow {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 @media (max-width: 768px) {

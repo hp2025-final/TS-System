@@ -3,7 +3,15 @@
 ## Prerequisites
 
 - Cloudways account
-- Git repository (GitHub, GitLab, or Bitbucket)
+- Git reposit# Run database migrations
+echo "🗄️ Running database migrations..."
+php artisan migrate --force
+
+# Clean seed data if needed (keep only users)
+# php artisan db:clean-seed-data --force
+
+# Seed database if needed (uncomment if required)
+# php artisan db:seed --forceitHub, GitLab, or Bitbucket)
 - SSH access to your Cloudways server
 - Domain name (optional but recommended)
 
