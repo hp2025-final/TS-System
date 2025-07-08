@@ -279,73 +279,105 @@
     </div>
 
     <!-- Barcode Scanner Modal -->
-    <div v-if="showScanner" class="scanner-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white p-4 rounded-lg max-w-md w-full mx-4">
-        <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          Advanced Scanner
-          <span v-if="isScanning" class="ml-2 text-green-600 text-sm flex items-center gap-1">
-            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            Active
-          </span>
-        </h3>
-        <div class="scanner-container relative">
-          <video ref="scannerVideo" class="w-full h-48 bg-gray-100 rounded-lg" autoplay playsinline muted></video>
-          <canvas ref="scannerCanvas" class="hidden"></canvas>
-          
-          <!-- Enhanced scanning overlay with corners -->
-          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div class="relative w-48 h-24">
-              <!-- Corner indicators -->
-              <div class="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-red-500"></div>
-              <div class="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-red-500"></div>
-              <div class="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-red-500"></div>
-              <div class="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-red-500"></div>
-              
-              <!-- Center crosshair -->
-              <div class="absolute inset-0 flex items-center justify-center">
-                <div class="w-1 h-6 bg-red-400 opacity-60"></div>
-                <div class="w-6 h-1 bg-red-400 opacity-60 absolute"></div>
+    <div v-if="showScanner" class="scanner-modal fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-2">
+      <div class="bg-white rounded-lg w-full max-w-lg mx-auto max-h-screen overflow-y-auto">
+        <!-- Header -->
+        <div class="p-4 border-b">
+          <h3 class="text-lg font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Advanced Scanner
+            <span v-if="isScanning" class="ml-auto text-green-600 text-sm flex items-center gap-1">
+              <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              Active
+            </span>
+          </h3>
+        </div>
+        
+        <!-- Scanner Area -->
+        <div class="p-4">
+          <div class="scanner-container relative bg-black rounded-lg overflow-hidden">
+            <video ref="scannerVideo" class="w-full h-64 sm:h-80 object-cover" autoplay playsinline muted></video>
+            <canvas ref="scannerCanvas" class="hidden"></canvas>
+            
+            <!-- Mobile-optimized scanning overlay -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div class="relative w-3/4 h-32 sm:h-40">
+                <!-- Corner indicators -->
+                <div class="absolute top-0 left-0 w-8 h-8 border-t-3 border-l-3 border-red-400"></div>
+                <div class="absolute top-0 right-0 w-8 h-8 border-t-3 border-r-3 border-red-400"></div>
+                <div class="absolute bottom-0 left-0 w-8 h-8 border-b-3 border-l-3 border-red-400"></div>
+                <div class="absolute bottom-0 right-0 w-8 h-8 border-b-3 border-r-3 border-red-400"></div>
+                
+                <!-- Scanning line animation -->
+                <div v-if="isScanning" class="absolute inset-0 overflow-hidden">
+                  <div class="scan-line w-full h-0.5 bg-red-400 opacity-80"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Status indicators -->
+            <div v-if="isScanning" class="absolute top-3 left-3 bg-green-500 text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+              <div class="w-2 h-2 bg-white rounded-full animate-ping"></div>
+              Scanning...
+            </div>
+            
+            <div class="absolute top-3 right-3 flex gap-2">
+              <button 
+                v-if="currentStream && currentStream.getVideoTracks()[0]?.getCapabilities?.()?.torch"
+                @click="toggleTorch"
+                :class="torchEnabled ? 'bg-yellow-500' : 'bg-gray-600'"
+                class="text-white px-2 py-1 rounded-full text-xs flex items-center gap-1"
+              >
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <div class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs">
+                Multi-format
+              </div>
+            </div>
+            
+            <!-- Instructions overlay -->
+            <div class="absolute bottom-3 left-3 right-3 bg-black bg-opacity-70 text-white p-2 rounded text-center text-sm">
+              <div class="font-medium">Position barcode within the frame</div>
+              <div class="text-xs opacity-90">Hold steady for best results</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Info Section -->
+        <div class="px-4 pb-4">
+          <div class="bg-gray-50 rounded-lg p-3 mb-4">
+            <div class="text-sm text-gray-700 space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="text-green-600">✨</span>
+                <span class="font-medium">Auto-scanning active</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-blue-600">📱</span>
+                <span class="text-xs">Supports: QR, EAN13/8, Code128/39, UPC-A/E, DataMatrix</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-orange-600">💡</span>
+                <span class="text-xs">Tip: Ensure good lighting and hold device steady</span>
               </div>
             </div>
           </div>
           
-          <!-- Enhanced scanning status -->
-          <div v-if="isScanning" class="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-            <div class="w-2 h-2 bg-white rounded-full animate-ping"></div>
-            Scanning...
-          </div>
-          
-          <!-- Format indicator -->
-          <div class="absolute top-2 right-2 bg-blue-500 text-white px-2 py-1 rounded text-xs">
-            Multi-format
-          </div>
-        </div>
-        <div class="mt-4">
-          <p class="text-sm text-gray-600 mb-3">
-            <span class="font-medium">✨ Advanced Auto-scanning:</span> Position any barcode/QR code within the frame
-            <br>
-            <span class="text-xs text-green-600 font-medium">
-              📱 Supports: QR, EAN13/8, Code128/39, UPC-A/E, DataMatrix, Codabar, ITF
-            </span>
-            <br>
-            <span class="text-xs text-blue-600">
-              💡 Tip: Hold steady for 1-2 seconds for best results
-            </span>
-          </p>
-          <div class="flex gap-2">
+          <!-- Action buttons -->
+          <div class="grid grid-cols-2 gap-3">
             <button 
               @click="stopBarcodeScanner" 
-              class="flex-1 px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors text-sm"
+              class="px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium"
             >
               ❌ Cancel
             </button>
             <button 
               @click="captureBarcode" 
-              class="flex-1 px-3 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors text-sm"
+              class="px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
             >
               ⌨️ Manual Entry
             </button>
@@ -400,6 +432,8 @@ export default {
     // ZXing barcode scanner
     const codeReader = ref(null)
     const isScanning = ref(false)
+    const torchEnabled = ref(false)
+    const currentStream = ref(null)
     
     // Computed properties
     const subtotal = computed(() => {
@@ -627,21 +661,26 @@ export default {
           }
         }
         
-        // Configure video constraints for better scanning
+        // Configure video constraints for better mobile scanning
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        
         const constraints = {
           video: {
             deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
-            width: { ideal: 1280, max: 1920 },
-            height: { ideal: 720, max: 1080 },
+            width: isMobile ? { ideal: 1920, max: 3840 } : { ideal: 1280, max: 1920 },
+            height: isMobile ? { ideal: 1080, max: 2160 } : { ideal: 720, max: 1080 },
             facingMode: selectedDeviceId ? undefined : { ideal: 'environment' },
             focusMode: { ideal: 'continuous' },
             exposureMode: { ideal: 'continuous' },
-            whiteBalanceMode: { ideal: 'continuous' }
+            whiteBalanceMode: { ideal: 'continuous' },
+            torch: false // Disable torch initially
           }
         }
         
-        // Start decoding with optimized settings
-        await codeReader.value.decodeFromConstraints(
+        console.log('Using constraints:', constraints)
+        
+        // Start decoding with enhanced mobile settings
+        const scanResult = await codeReader.value.decodeFromConstraints(
           constraints,
           scannerVideo.value,
           (result, err) => {
@@ -651,14 +690,14 @@ export default {
               const format = result.getBarcodeFormat()
               console.log('Scanned code:', scannedCode, 'Format:', format)
               
-              // Validate scanned code
-              if (scannedCode && scannedCode.trim()) {
+              // Validate scanned code (more lenient for mobile)
+              if (scannedCode && scannedCode.trim() && scannedCode.length >= 3) {
                 // Set the scanned code to search term
                 searchTerm.value = scannedCode.trim()
                 
                 // Provide haptic feedback on mobile devices
                 if (navigator.vibrate) {
-                  navigator.vibrate([100, 50, 100]) // Short vibration pattern
+                  navigator.vibrate([200, 100, 200]) // Stronger vibration pattern
                 }
                 
                 // Stop scanning and close modal
@@ -668,8 +707,8 @@ export default {
                 searchByBarcode()
                 
                 // Show success message with format info
-                const formatName = format ? format.toString() : 'Unknown'
-                showCartMessage(`${formatName} scanned successfully!`, 'success')
+                const formatName = format ? format.toString().replace('_', '-') : 'Barcode'
+                showCartMessage(`${formatName} scanned: ${scannedCode.substring(0, 10)}...`, 'success')
               }
               
             } else if (err && !(err instanceof NotFoundException)) {
@@ -677,6 +716,11 @@ export default {
             }
           }
         )
+        
+        // Store the stream for torch control
+        if (scannerVideo.value && scannerVideo.value.srcObject) {
+          currentStream.value = scannerVideo.value.srcObject
+        }
         
         console.log('Scanner started successfully')
         
@@ -705,6 +749,7 @@ export default {
     const stopBarcodeScanner = () => {
       showScanner.value = false
       isScanning.value = false
+      torchEnabled.value = false
       
       // Stop ZXing scanner
       if (codeReader.value) {
@@ -717,9 +762,33 @@ export default {
         stream.value = null
       }
       
+      // Stop current stream
+      if (currentStream.value) {
+        currentStream.value.getTracks().forEach(track => track.stop())
+        currentStream.value = null
+      }
+      
       // Clear video source
       if (scannerVideo.value) {
         scannerVideo.value.srcObject = null
+      }
+    }
+
+    const toggleTorch = async () => {
+      if (!currentStream.value) return
+      
+      const track = currentStream.value.getVideoTracks()[0]
+      if (!track || !track.getCapabilities().torch) return
+      
+      try {
+        torchEnabled.value = !torchEnabled.value
+        await track.applyConstraints({
+          advanced: [{ torch: torchEnabled.value }]
+        })
+        console.log('Torch toggled:', torchEnabled.value)
+      } catch (err) {
+        console.error('Failed to toggle torch:', err)
+        torchEnabled.value = false
       }
     }
 
@@ -851,6 +920,8 @@ export default {
       totalDiscount,
       tax,
       total,
+      torchEnabled,
+      currentStream,
       onBarcodeInput,
       resetSearchBar,
       clearResults,
@@ -864,6 +935,7 @@ export default {
       getStatusColorText,
       startBarcodeScanner,
       stopBarcodeScanner,
+      toggleTorch,
       captureBarcode,
       checkout,
       getHighestDiscount,
@@ -939,18 +1011,41 @@ export default {
 
 /* Scanner animations */
 @keyframes scan-line {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+  0% { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(400%); opacity: 0; }
 }
 
 .scan-line {
   animation: scan-line 2s ease-in-out infinite;
 }
 
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .scanner-modal {
+    padding: 8px;
+  }
+  
+  .scanner-container video {
+    height: 280px !important;
+  }
+  
+  /* Ensure proper aspect ratio on mobile */
+  .scanner-container {
+    aspect-ratio: 16/9;
+  }
+}
+
+/* Enhanced border styles */
+.border-t-3 { border-top-width: 3px; }
+.border-l-3 { border-left-width: 3px; }
+.border-r-3 { border-right-width: 3px; }
+.border-b-3 { border-bottom-width: 3px; }
+
 /* Pulse animation for active status */
 @keyframes pulse-grow {
   0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.7; }
+  50% { transform: scale(1.1); opacity: 0.8; }
   100% { transform: scale(1); opacity: 1; }
 }
 
