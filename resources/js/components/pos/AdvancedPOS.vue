@@ -525,19 +525,27 @@ export default {
       
       try {
         console.log('Searching for barcode:', searchTerm.value.trim())
+        console.log('API URL:', `/api/test-barcode/${searchTerm.value.trim()}`)
+        console.log('Full URL:', `${axios.defaults.baseURL}/api/test-barcode/${searchTerm.value.trim()}`)
+        
         const response = await axios.get(`/api/test-barcode/${searchTerm.value.trim()}`)
         console.log('Search response:', response.data)
+        console.log('Response status:', response.status)
         
         // Validate response is an object with dress property
         if (response.data && typeof response.data === 'object' && response.data.dress) {
           foundDressItem.value = response.data
+          console.log('Item found and set:', foundDressItem.value)
         } else {
           console.error('Invalid response format:', response.data)
+          console.log('Response data type:', typeof response.data)
+          console.log('Has dress property:', !!response.data?.dress)
           foundDressItem.value = null
         }
         
       } catch (error) {
         console.error('Search error:', error)
+        console.log('Error response:', error.response)
         if (error.response?.status === 404) {
           foundDressItem.value = null
           console.log('Item not found - showing no results')
@@ -891,7 +899,8 @@ export default {
       }
       
       // Set base URL to Laravel backend
-      axios.defaults.baseURL = 'http://127.0.0.1:8000'
+      axios.defaults.baseURL = window.location.origin
+      console.log('Axios base URL set to:', axios.defaults.baseURL)
       
       // Auto-focus on barcode input
       if (barcodeInput.value) {

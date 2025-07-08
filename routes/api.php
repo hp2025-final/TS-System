@@ -20,6 +20,9 @@ Route::get('/company-config', function () {
     return response()->json(config('company'));
 });
 
+// Barcode search route (for POS scanner)
+Route::get('/test-barcode/{barcode}', [DressItemController::class, 'getByBarcode']);
+
 // Test Sales Endpoint (Public for testing - remove in production)
 Route::prefix('sales')->group(function () {
     Route::post('/test', function (Request $request) {
