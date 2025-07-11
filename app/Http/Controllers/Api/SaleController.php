@@ -188,7 +188,7 @@ class SaleController extends Controller
                     'collection_name' => $collection->name,
                     'sku' => $dress->sku,
                     'barcode' => $dressItem->barcode,
-                    'size' => $dressItem->size,
+                    'size' => $dressItem->dress->size,
                     'cost_price' => $dress->cost_price,
                     'sale_price' => $itemData['original_price'],
                     'collection_discount_percentage' => $itemData['collection_discount_percentage'],
@@ -196,7 +196,8 @@ class SaleController extends Controller
                     'size_discount_percentage' => $itemData['size_discount_percentage'],
                     'total_discount_amount' => $itemData['total_discount'],
                     'tax_percentage' => $dress->tax_percentage,
-                    'tax_amount' => ($itemData['final_price'] * $dress->tax_percentage) / 100,
+                    // GST calculated on original price (before discount)
+                    'tax_amount' => ($itemData['original_price'] * $dress->tax_percentage) / 100,
                     'item_total' => $itemData['final_price'],
                     'profit_amount' => $itemData['profit'],
                 ]);
@@ -328,5 +329,42 @@ class SaleController extends Controller
         $second = $now->format('s');
         
         return "TS-{$year}{$month}{$day}{$hour}{$minute}{$second}";
+    }
+
+    /**
+     * Search sold items for returns
+     */
+    public function searchSoldItems(Request $request)
+    {
+        $query = $request->get('query');
+        
+        if (!$query) {
+            return response()->json(['data' => []]);
+        }
+
+        $saleItems = SaleItem::with(['sale', 'dressItem.dress.collection'])
+            ->where(function ($q) use ($query) {
+                $q->where('barcode', 'LIKE', "%{$query}%")
+                  ->orWhereHas('sale', function ($subQ) use ($query) {
+                      $subQ->where('invoice_number', 'LIKE', "%{$query}%")
+                           ->orWhere('fbr_invoice_number', 'LIKE', "%{$query}%");
+                  });
+            })
+            // Exclude items that have already been returned/exchanged
+            ->whereNotExists(function ($subQuery) {
+                $subQuery->select(\DB::raw(1))
+                    ->from('returns')
+                    ->whereColumn('returns.sale_item_id', 'sale_items.id')
+                    ->whereColumn('returns.dress_item_id', 'sale_items.dress_item_id');
+            })
+            // Only include items where the dress item is still in 'sold' status
+            ->whereHas('dressItem', function ($q) {
+                $q->where('status', 'sold');
+            })
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        return response()->json(['data' => $saleItems]);
     }
 }

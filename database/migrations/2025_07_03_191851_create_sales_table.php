@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('invoice_number')->unique();
+            $table->string('fbr_invoice_number')->nullable();
             $table->decimal('subtotal', 10, 2);
             $table->decimal('collection_discount_amount', 10, 2)->default(0);
             $table->decimal('dress_discount_amount', 10, 2)->default(0);

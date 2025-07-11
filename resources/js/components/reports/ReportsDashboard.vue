@@ -277,10 +277,10 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="item in lowStockReport.items" :key="item.dress_id + '-' + item.size">
+              <tr v-for="item in lowStockReport.items" :key="item.dress_id + '-' + item.dress.size">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.dress_name }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.collection_name }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.size }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.dress.size }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" :class="item.available_count === 0 ? 'text-red-600' : 'text-yellow-600'">
                   {{ item.available_count }}
                 </td>

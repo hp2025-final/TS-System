@@ -41,14 +41,16 @@ class CollectionController extends Controller
                 'M' => 0,
                 'L' => 0,
                 'XL' => 0,
+                'unstitched' => 0,
             ];
 
             foreach ($collection->dresses as $dress) {
-                foreach ($dress->dressItems as $item) {
-                    $totalItems++;
-                    if (isset($sizeBreakdown[$item->size])) {
-                        $sizeBreakdown[$item->size]++;
-                    }
+                $availableItems = $dress->dressItems->count();
+                $totalItems += $availableItems;
+                
+                // Get size from dress table, not dress_items table
+                if ($availableItems > 0 && isset($sizeBreakdown[$dress->size])) {
+                    $sizeBreakdown[$dress->size] += $availableItems;
                 }
             }
 

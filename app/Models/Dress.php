@@ -13,6 +13,8 @@ class Dress extends Model
         'name',
         'sku',
         'description',
+        'size',
+        'hs_code',
         'cost_price',
         'sale_price',
         'discount_percentage',

@@ -11,7 +11,6 @@ class DressItem extends Model
     protected $fillable = [
         'dress_id',
         'barcode',
-        'size',
         'size_discount_percentage',
         'size_discount_active',
         'status',

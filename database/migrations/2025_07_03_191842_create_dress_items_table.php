@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('dress_id')->constrained()->onDelete('cascade');
             $table->string('barcode')->unique();
-            $table->enum('size', ['XS', 'S', 'M', 'L', 'XL', 'XXL']);
             $table->decimal('size_discount_percentage', 5, 2)->default(0);
             $table->boolean('size_discount_active')->default(false);
             $table->enum('status', ['available', 'sold', 'returned', 'damaged'])->default('available');

@@ -5,15 +5,6 @@
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-3xl font-bold text-stone-900">Collections</h1>
-          <p class="text-stone-600 mt-1">Manage your boutique collections with size breakdown</p>
-        </div>
-        <div class="flex items-center space-x-4">
-          <button class="bg-gradient-to-r from-stone-600 to-stone-700 hover:from-stone-700 hover:to-stone-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg">
-            <svg class="h-5 w-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            New Collection
-          </button>
         </div>
       </div>
     </div>
@@ -55,7 +46,7 @@
               >
                 {{ size }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+              <th v-if="isAdmin" class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -119,7 +110,7 @@
               </td>
               
               <!-- Actions -->
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td v-if="isAdmin" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex items-center space-x-2">
                   <button class="text-stone-400 hover:text-stone-600 transition-colors">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +137,7 @@
         </svg>
         <h3 class="text-lg font-medium text-stone-900 mb-2">No collections found</h3>
         <p class="text-stone-600 mb-4">Create your first collection to organize your boutique inventory</p>
-        <button class="bg-gradient-to-r from-stone-600 to-stone-700 hover:from-stone-700 hover:to-stone-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg">
+        <button v-if="isAdmin" class="bg-gradient-to-r from-stone-600 to-stone-700 hover:from-stone-700 hover:to-stone-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg">
           Create Collection
         </button>
       </div>
@@ -223,28 +214,70 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useAuthStore } from '../../stores/auth.js';
+
+const authStore = useAuthStore();
 
 const collections = ref([]);
 const allSizes = ref([]);
 const loading = ref(true);
 
+// Role-based access control
+const isAdmin = computed(() => {
+  try {
+    const user = authStore.user;
+    const isAuthenticated = authStore.isAuthenticated;
+    
+    if (!isAuthenticated || !user || !user.role) {
+      return false;
+    }
+    
+    return user.role.toLowerCase() === 'admin';
+  } catch (error) {
+    console.error('Error in isAdmin computed:', error);
+    return false;
+  }
+});
+
 const totalDresses = computed(() => {
-  if (!Array.isArray(collections.value)) return 0;
-  return collections.value.reduce((sum, collection) => sum + (collection.dresses_count || 0), 0);
+  try {
+    if (!Array.isArray(collections.value)) return 0;
+    return collections.value.reduce((sum, collection) => sum + (collection.dresses_count || 0), 0);
+  } catch (error) {
+    console.error('Error calculating total dresses:', error);
+    return 0;
+  }
 });
 
 const totalAvailableItems = computed(() => {
-  if (!Array.isArray(collections.value)) return 0;
-  return collections.value.reduce((sum, collection) => sum + (collection.total_items || 0), 0);
+  try {
+    if (!Array.isArray(collections.value)) return 0;
+    return collections.value.reduce((sum, collection) => sum + (collection.total_items || 0), 0);
+  } catch (error) {
+    console.error('Error calculating total available items:', error);
+    return 0;
+  }
 });
 
 const totalItems = computed(() => {
-  if (!Array.isArray(collections.value)) return 0;
-  return collections.value.reduce((sum, collection) => sum + (collection.total_items || 0), 0);
+  try {
+    if (!Array.isArray(collections.value)) return 0;
+    return collections.value.reduce((sum, collection) => sum + (collection.total_items || 0), 0);
+  } catch (error) {
+    console.error('Error calculating total items:', error);
+    return 0;
+  }
 });
 
 onMounted(async () => {
-  await loadCollections();
+  try {
+    // Ensure auth is checked
+    await authStore.checkAuth();
+    await loadCollections();
+  } catch (error) {
+    console.error('Error during component initialization:', error);
+    loading.value = false;
+  }
 });
 
 const loadCollections = async () => {

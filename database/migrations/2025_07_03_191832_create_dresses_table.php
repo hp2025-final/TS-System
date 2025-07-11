@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('sku')->unique();
             $table->text('description')->nullable();
+            $table->enum('size', ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'unstitched']);
+            $table->string('hs_code')->nullable();
             $table->decimal('cost_price', 10, 2);
             $table->decimal('sale_price', 10, 2);
             $table->decimal('discount_percentage', 5, 2)->default(0);

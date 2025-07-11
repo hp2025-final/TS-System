@@ -16,6 +16,7 @@ class SaleItem extends Model
         'sku',
         'barcode',
         'size',
+        'fbr_invoice_number',
         'cost_price',
         'sale_price',
         'collection_discount_percentage',

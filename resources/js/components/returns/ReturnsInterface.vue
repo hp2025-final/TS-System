@@ -58,7 +58,7 @@
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Size:</span>
-              <span class="text-sm font-medium">{{ foundItem.size }}</span>
+              <span class="text-sm font-medium">{{ foundItem.dress.size }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Barcode:</span>
@@ -172,7 +172,7 @@
               <div class="flex justify-between items-center">
                 <div>
                   <p class="text-sm font-medium">{{ exchangeItem.dress?.name }}</p>
-                  <p class="text-xs text-gray-600">{{ exchangeItem.dress?.collection?.name }} - Size: {{ exchangeItem.size }}</p>
+                  <p class="text-xs text-gray-600">{{ exchangeItem.dress?.collection?.name }} - Size: {{ exchangeItem.dress?.size }}</p>
                   <p class="text-xs text-green-600">PKR {{ exchangeItem.final_price || exchangeItem.dress?.sale_price }}</p>
                 </div>
                 <button

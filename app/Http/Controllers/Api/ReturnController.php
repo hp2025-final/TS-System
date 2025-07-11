@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ReturnItem;
-use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\DressItem;
 use Illuminate\Http\Request;
@@ -18,118 +17,135 @@ class ReturnController extends Controller
      */
     public function index(Request $request)
     {
-        $query = ReturnItem::with(['saleItem.dressItem.dress', 'saleItem.sale', 'processedBy'])
+        $query = ReturnItem::with(['saleItem.sale', 'user', 'exchangeItem.dress.collection'])
             ->orderBy('created_at', 'desc');
 
         // Filter by date range
         if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
+            $query->whereDate('return_date', '>=', $request->date_from);
         }
 
         if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
+            $query->whereDate('return_date', '<=', $request->date_to);
         }
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        // Filter by return type
+        if ($request->filled('return_type')) {
+            $query->where('return_type', $request->return_type);
         }
 
-        $returns = $query->paginate($request->get('per_page', 15));
+        $returns = $query->paginate($request->get('per_page', 50));
 
         return response()->json($returns);
     }
 
     /**
-     * Store a new return request
+     * Store a new return
      */
     public function store(Request $request)
     {
         $request->validate([
-            'sale_id' => 'required|exists:sales,id',
-            'items' => 'required|array|min:1',
-            'items.*.sale_item_id' => 'required|exists:sale_items,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.reason' => 'required|string|in:defective,wrong_size,customer_request,damaged',
-            'items.*.return_type' => 'required|in:refund,exchange',
-            'items.*.exchange_item_id' => 'nullable|exists:dress_items,id',
+            'sale_item_id' => 'required|exists:sale_items,id',
+            'dress_item_id' => 'required|exists:dress_items,id',
+            'return_type' => 'required|in:return,exchange',
+            'return_reason' => 'required|string',
+            'refund_amount' => 'required|numeric|min:0',
+            'exchange_item_id' => 'nullable|exists:dress_items,id',
+            'notes' => 'nullable|string',
         ]);
 
         try {
             DB::beginTransaction();
 
-            $sale = Sale::findOrFail($request->sale_id);
-            $returnNumber = $this->generateReturnNumber();
+            // Verify the sale item and dress item match
+            $saleItem = SaleItem::with('sale')->findOrFail($request->sale_item_id);
+            $dressItem = DressItem::findOrFail($request->dress_item_id);
 
-            foreach ($request->items as $itemData) {
-                $saleItem = SaleItem::with(['dressItem', 'sale'])->findOrFail($itemData['sale_item_id']);
-                
-                // Verify the sale item belongs to the specified sale
-                if ($saleItem->sale_id !== $sale->id) {
-                    return response()->json([
-                        'message' => 'Sale item does not belong to the specified sale'
-                    ], 400);
-                }
-
-                // Check return eligibility (within 7 days)
-                if ($sale->created_at->diffInDays(now()) > 7) {
-                    return response()->json([
-                        'message' => 'Return period has expired (7 days limit)'
-                    ], 400);
-                }
-
-                // Check quantity
-                if ($itemData['quantity'] > $saleItem->quantity) {
-                    return response()->json([
-                        'message' => 'Return quantity cannot exceed sold quantity'
-                    ], 400);
-                }
-
-                // For exchanges, validate the exchange item
-                $exchangeItem = null;
-                if ($itemData['return_type'] === 'exchange' && isset($itemData['exchange_item_id'])) {
-                    $exchangeItem = DressItem::findOrFail($itemData['exchange_item_id']);
-                    if ($exchangeItem->status !== 'available') {
-                        return response()->json([
-                            'message' => 'Exchange item is not available'
-                        ], 400);
-                    }
-                }
-
-                // Calculate refund amount
-                $refundAmount = $saleItem->unit_price * $itemData['quantity'];
-
-                // Create return record
-                $return = ReturnItem::create([
-                    'sale_item_id' => $saleItem->id,
-                    'return_number' => $returnNumber,
-                    'quantity' => $itemData['quantity'],
-                    'reason' => $itemData['reason'],
-                    'return_type' => $itemData['return_type'],
-                    'exchange_dress_item_id' => $itemData['exchange_item_id'] ?? null,
-                    'refund_amount' => $itemData['return_type'] === 'refund' ? $refundAmount : 0,
-                    'status' => 'pending',
-                    'requested_by' => Auth::id(),
-                    'requested_at' => now(),
-                ]);
-
-                // If it's an exchange, reserve the exchange item
-                if ($exchangeItem) {
-                    $exchangeItem->update(['status' => 'reserved']);
-                }
+            // Verify that the sale item and dress item match
+            if ($saleItem->dress_item_id !== $dressItem->id) {
+                return response()->json([
+                    'message' => 'Sale item and dress item do not match'
+                ], 400);
             }
+
+            // Check if item is actually sold
+            if ($dressItem->status !== 'sold') {
+                return response()->json([
+                    'message' => 'Item must be in sold status to be returned/exchanged'
+                ], 400);
+            }
+
+            // Check if this item has already been returned or exchanged
+            $existingReturn = ReturnItem::where('sale_item_id', $request->sale_item_id)
+                ->where('dress_item_id', $request->dress_item_id)
+                ->first();
+            
+            if ($existingReturn) {
+                return response()->json([
+                    'message' => 'This item has already been returned/exchanged on ' . $existingReturn->return_date->format('Y-m-d')
+                ], 400);
+            }
+
+            // Check if return is within allowed timeframe (7 days)
+            $saleDate = $saleItem->sale->created_at;
+            if ($saleDate->diffInDays(now()) > 7) {
+                return response()->json([
+                    'message' => 'Return period has expired (7 days limit)'
+                ], 400);
+            }
+
+            // For exchanges, validate exchange item
+            if ($request->return_type === 'exchange' && $request->exchange_item_id) {
+                $exchangeItem = DressItem::findOrFail($request->exchange_item_id);
+                if ($exchangeItem->status !== 'available') {
+                    return response()->json([
+                        'message' => 'Exchange item is not available'
+                    ], 400);
+                }
+
+                // Prevent exchanging with the same item
+                if ($exchangeItem->id === $dressItem->id) {
+                    return response()->json([
+                        'message' => 'Cannot exchange item with itself'
+                    ], 400);
+                }
+
+                // Mark exchange item as sold
+                $exchangeItem->update(['status' => 'sold', 'sold_at' => now()]);
+            }
+
+            // Create return record
+            $return = ReturnItem::create([
+                'sale_item_id' => $request->sale_item_id,
+                'dress_item_id' => $request->dress_item_id,
+                'user_id' => Auth::id(),
+                'return_reason' => $request->return_reason,
+                'return_type' => $request->return_type,
+                'refund_amount' => $request->refund_amount,
+                'exchange_item_id' => $request->exchange_item_id,
+                'return_date' => now(),
+                'notes' => $request->notes,
+            ]);
+
+            // Update dress item status - returned items should not be available for sale again
+            $dressItem->update([
+                'status' => 'returned', // Always mark as returned, never make available again
+                'returned_at' => now()
+            ]);
 
             DB::commit();
 
+            $return->load(['saleItem.sale', 'user']);
+            
             return response()->json([
-                'message' => 'Return request submitted successfully',
-                'return_number' => $returnNumber
+                'message' => 'Return processed successfully',
+                'return' => $return
             ], 201);
 
         } catch (\Exception $e) {
-            DB::rollback();
+            DB::rollBack();
             return response()->json([
-                'message' => 'Return request failed',
+                'message' => 'Error processing return',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -138,125 +154,74 @@ class ReturnController extends Controller
     /**
      * Display the specified return
      */
-    public function show(ReturnItem $returnItem)
+    public function show(ReturnItem $return)
     {
-        $returnItem->load([
-            'saleItem.dressItem.dress.collection',
-            'saleItem.sale',
-            'exchangeDressItem.dress',
-            'processedBy',
-            'requestedBy'
-        ]);
-        
-        return response()->json($returnItem);
+        $return->load(['saleItem.sale', 'dressItem.dress.collection', 'user', 'exchangeItem.dress.collection']);
+        return response()->json($return);
     }
 
     /**
-     * Process a return (approve/reject)
+     * Update the specified return
      */
-    public function process(Request $request, ReturnItem $returnItem)
+    public function update(Request $request, ReturnItem $return)
     {
         $request->validate([
-            'action' => 'required|in:approve,reject',
-            'notes' => 'nullable|string|max:500'
+            'notes' => 'nullable|string',
         ]);
 
-        if ($returnItem->status !== 'pending') {
+        $return->update($request->only(['notes']));
+
+        return response()->json([
+            'message' => 'Return updated successfully',
+            'return' => $return
+        ]);
+    }
+
+    /**
+     * Remove the specified return
+     */
+    public function destroy(ReturnItem $return)
+    {
+        // Only allow deletion if it's a recent return (within 1 hour)
+        if ($return->created_at->diffInHours(now()) > 1) {
             return response()->json([
-                'message' => 'Return has already been processed'
+                'message' => 'Cannot delete returns older than 1 hour'
             ], 400);
         }
 
         try {
             DB::beginTransaction();
 
-            if ($request->action === 'approve') {
-                // Return the original item to available status
-                $returnItem->saleItem->dressItem->update([
+            // Restore dress item status
+            if ($return->dressItem) {
+                $return->dressItem->update([
+                    'status' => 'sold',
+                    'returned_at' => null
+                ]);
+            }
+
+            // If it was an exchange, restore exchange item status
+            if ($return->exchangeItem) {
+                $return->exchangeItem->update([
                     'status' => 'available',
                     'sold_at' => null
                 ]);
-
-                // If it's an exchange, mark exchange item as sold
-                if ($returnItem->return_type === 'exchange' && $returnItem->exchangeDressItem) {
-                    $returnItem->exchangeDressItem->update([
-                        'status' => 'sold',
-                        'sold_at' => now()
-                    ]);
-                }
-
-                $returnItem->update([
-                    'status' => 'approved',
-                    'processed_by' => Auth::id(),
-                    'processed_at' => now(),
-                    'notes' => $request->notes
-                ]);
-
-            } else {
-                // Reject the return
-                // If it was an exchange, release the reserved item
-                if ($returnItem->exchangeDressItem) {
-                    $returnItem->exchangeDressItem->update(['status' => 'available']);
-                }
-
-                $returnItem->update([
-                    'status' => 'rejected',
-                    'processed_by' => Auth::id(),
-                    'processed_at' => now(),
-                    'notes' => $request->notes
-                ]);
             }
+
+            $return->delete();
 
             DB::commit();
 
             return response()->json([
-                'message' => "Return {$request->action}d successfully",
-                'return' => $returnItem->fresh()->load([
-                    'saleItem.dressItem.dress',
-                    'exchangeDressItem.dress',
-                    'processedBy'
-                ])
+                'message' => 'Return deleted successfully'
             ]);
 
         } catch (\Exception $e) {
-            DB::rollback();
+            DB::rollBack();
             return response()->json([
-                'message' => 'Failed to process return',
+                'message' => 'Error deleting return',
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Get return statistics
-     */
-    public function statistics(Request $request)
-    {
-        $dateFrom = $request->get('date_from', now()->subDays(30)->toDateString());
-        $dateTo = $request->get('date_to', now()->toDateString());
-
-        $returns = ReturnItem::whereBetween('created_at', [$dateFrom, $dateTo])->get();
-
-        $stats = [
-            'total_returns' => $returns->count(),
-            'approved_returns' => $returns->where('status', 'approved')->count(),
-            'rejected_returns' => $returns->where('status', 'rejected')->count(),
-            'pending_returns' => $returns->where('status', 'pending')->count(),
-            'total_refund_amount' => $returns->where('status', 'approved')->sum('refund_amount'),
-            'return_reasons' => $returns->groupBy('reason')->map->count(),
-            'return_types' => $returns->groupBy('return_type')->map->count(),
-        ];
-
-        return response()->json($stats);
-    }
-
-    /**
-     * Generate unique return number
-     */
-    private function generateReturnNumber()
-    {
-        $today = now()->format('Ymd');
-        $count = ReturnItem::whereDate('created_at', now())->count() + 1;
-        return "RT{$today}" . str_pad($count, 4, '0', STR_PAD_LEFT);
     }
 }

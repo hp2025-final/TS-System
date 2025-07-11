@@ -28,7 +28,9 @@ class DressItemController extends Controller
 
         // Filter by size
         if ($request->has('size')) {
-            $query->where('size', $request->size);
+            $query->whereHas('dress', function($q) use ($request) {
+                $q->where('size', $request->size);
+            });
         }
 
         // Filter available items only
@@ -54,7 +56,6 @@ class DressItemController extends Controller
         $request->validate([
             'dress_id' => 'required|exists:dresses,id',
             'barcode' => 'required|string|unique:dress_items',
-            'size' => 'required|in:XS,S,M,L,XL,XXL',
             'size_discount_percentage' => 'nullable|numeric|min:0|max:100',
             'size_discount_active' => 'boolean',
             'status' => 'in:available,sold,returned,damaged'
@@ -86,7 +87,6 @@ class DressItemController extends Controller
         $request->validate([
             'dress_id' => 'required|exists:dresses,id',
             'barcode' => 'required|string|unique:dress_items,barcode,' . $dressItem->id,
-            'size' => 'required|in:XS,S,M,L,XL,XXL',
             'size_discount_percentage' => 'nullable|numeric|min:0|max:100',
             'size_discount_active' => 'boolean',
             'status' => 'in:available,sold,returned,damaged'
@@ -237,5 +237,30 @@ class DressItemController extends Controller
         ];
 
         return response()->json($discounts);
+    }
+
+    /**
+     * Get available items for exchange
+     */
+    public function getAvailableForExchange(Request $request)
+    {
+        $search = $request->get('search');
+        
+        $query = DressItem::with(['dress.collection'])
+            ->where('status', 'available');
+            
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('barcode', 'LIKE', "%{$search}%")
+                  ->orWhereHas('dress', function($subQ) use ($search) {
+                      $subQ->where('name', 'LIKE', "%{$search}%")
+                           ->orWhere('sku', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+        
+        $items = $query->limit(20)->get();
+        
+        return response()->json(['data' => $items]);
     }
 }

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('collection_name');
             $table->string('sku');
             $table->string('size');
+            $table->string('fbr_invoice_number')->nullable();
             $table->decimal('cost_price', 10, 2);
             $table->decimal('sale_price', 10, 2);
             $table->decimal('collection_discount_percentage', 5, 2)->default(0);

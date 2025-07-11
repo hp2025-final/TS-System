@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Dresses API</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Test Dresses API</h1>
+    <button onclick="testDressesAPI()">Test API Call</button>
+    <div id="results"></div>
+    <script>
+        async function testDressesAPI() {
+            try {
+                console.log('Making API call to /api/dresses...');
+                const response = await axios.get('/api/dresses');
+                console.log('Response:', response.data);
+                document.getElementById('results').innerHTML = 
+                    '<h2>Success! Found ' + response.data.length + ' dresses</h2>' +
+                    '<pre>' + JSON.stringify(response.data.slice(0, 2), null, 2) + '</pre>';
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML = 
+                    '<h2>Error:</h2><pre>' + error.message + '\n' + 
+                    (error.response ? JSON.stringify(error.response.data, null, 2) : '') + '</pre>';
+            }
+        }
+    </script>
+</body>
+</html>

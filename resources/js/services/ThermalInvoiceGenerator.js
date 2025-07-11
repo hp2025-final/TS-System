@@ -409,7 +409,7 @@ export class ThermalInvoiceGenerator {
     cartItems.forEach(item => {
       const itemName = item.dress?.name || item.dress_name || 'Unknown Item'
       const collectionName = item.dress?.collection?.name || item.collection_name || 'Unknown Collection'
-      const size = item.size || 'N/A'
+      const size = item.dress?.size || item.size || 'N/A'
       const sku = item.dress?.sku || item.sku || 'N/A'
       // Prioritize barcode from sale_items table, then from dress_item
       const barcode = item.barcode || item.dress_item?.barcode || item.dress?.barcode || 'N/A'
@@ -471,7 +471,7 @@ export class ThermalInvoiceGenerator {
         <span>Rs. ${subtotal}</span>
       </div>
       <div class="total-row">
-        <span>Tax:</span>
+        <span>GST (18%):</span>
         <span>Rs. ${tax}</span>
       </div>
       <div class="total-row final-total">

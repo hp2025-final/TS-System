@@ -27,7 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const login = async (email, password) => {
     try {
-      const response = await window.axios.post('/login', {
+      const response = await window.axios.post('/api/login', {
         email,
         password
       });
@@ -46,7 +46,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const register = async (name, email, password, password_confirmation) => {
     try {
-      const response = await window.axios.post('/register', {
+      const response = await window.axios.post('/api/register', {
         name,
         email,
         password,
@@ -69,7 +69,7 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = async () => {
     try {
       if (token.value) {
-        await window.axios.post('/logout');
+        await window.axios.post('/api/logout');
       }
     } catch (error) {
       console.error('Logout error:', error);
@@ -81,7 +81,7 @@ export const useAuthStore = defineStore('auth', () => {
   const checkAuth = async () => {
     if (token.value) {
       try {
-        const response = await window.axios.get('/user');
+        const response = await window.axios.get('/api/user');
         user.value = response.data;
       } catch (error) {
         // Token is invalid, clear auth

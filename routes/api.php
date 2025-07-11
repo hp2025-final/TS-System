@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\DressController;
 use App\Http\Controllers\Api\DressItemController;
 use App\Http\Controllers\Api\CollectionController;
+use App\Http\Controllers\Api\ReturnController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -34,7 +35,6 @@ Route::prefix('sales')->group(function () {
             'items' => 'required|array|min:1',
             'items.*.dress_item_id' => 'required|integer|exists:dress_items,id',
             'items.*.barcode' => 'required|string',
-            'items.*.size' => 'required|string',
             'items.*.final_price' => 'required|numeric|min:0',
             'items.*.total_discount' => 'nullable|numeric|min:0',
             'subtotal' => 'required|numeric|min:0',
@@ -63,7 +63,8 @@ Route::prefix('sales')->group(function () {
                 $itemSubtotal = $dressItem->dress->sale_price;
                 $itemDiscount = $item['total_discount'] ?? 0;
                 $itemFinalPrice = $item['final_price'];
-                $itemTax = $itemFinalPrice * ($dressItem->dress->tax_percentage / 100);
+                // GST should be calculated on original price (before discount)
+                $itemTax = $dressItem->dress->sale_price * ($dressItem->dress->tax_percentage / 100);
 
                 $subtotal += $itemFinalPrice;
                 $totalDiscountAmount += $itemDiscount;
@@ -103,13 +104,14 @@ Route::prefix('sales')->group(function () {
                     'collection_name' => $dressItem->dress->collection->name,
                     'sku' => $dressItem->dress->sku,
                     'barcode' => $dressItem->barcode,
-                    'size' => $dressItem->size,
+                    'size' => $dressItem->dress->size,
                     'cost_price' => $dressItem->dress->cost_price,
                     'sale_price' => $dressItem->dress->sale_price,
                     'total_discount_amount' => $item['total_discount'] ?? 0,
                     'tax_percentage' => $dressItem->dress->tax_percentage,
-                    'tax_amount' => $item['final_price'] * ($dressItem->dress->tax_percentage / 100),
-                    'item_total' => $item['final_price'] + ($item['final_price'] * ($dressItem->dress->tax_percentage / 100)),
+                    // GST calculated on original price (before discount)
+                    'tax_amount' => $dressItem->dress->sale_price * ($dressItem->dress->tax_percentage / 100),
+                    'item_total' => $item['final_price'] + ($dressItem->dress->sale_price * ($dressItem->dress->tax_percentage / 100)),
                     'profit_amount' => $item['final_price'] - $dressItem->dress->cost_price,
                 ]);
             }
@@ -131,6 +133,10 @@ Route::prefix('sales')->group(function () {
 // Public Collections route (temporary for testing)
 Route::apiResource('collections', CollectionController::class);
 Route::put('/collections/{collection}/discount', [CollectionController::class, 'updateDiscount']);
+
+// Public Dresses route (temporary for testing)
+Route::apiResource('dresses', DressController::class);
+Route::put('/dresses/{dress}/discount', [DressController::class, 'updateDiscount']);
 
 // Protected routes (require authentication)
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -163,22 +169,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ]);
     });
 
-    // Dresses
-    Route::apiResource('dresses', DressController::class);
-    Route::put('/dresses/{dress}/discount', [DressController::class, 'updateDiscount']);
-
-    // Dress Items (Individual pieces)
-    Route::apiResource('dress-items', DressItemController::class);
+    // Dress Items (Individual pieces) - specific routes first
+    Route::get('/dress-items/available', [DressItemController::class, 'getAvailableForExchange']);
     Route::get('/dress-items/barcode/{barcode}', [DressItemController::class, 'getByBarcode']);
     Route::put('/dress-items/{dressItem}/discount', [DressItemController::class, 'updateDiscount']);
     Route::post('/validate-barcode', [DressItemController::class, 'validateBarcode']);
+    Route::apiResource('dress-items', DressItemController::class);
 
-    // Sales
-    Route::apiResource('sales', SaleController::class);
+    // Sales - specific routes first
+    Route::get('/sales/search-items', [SaleController::class, 'searchSoldItems']);
     Route::get('/sales/{sale}/invoice', [SaleController::class, 'generateInvoice']);
+    Route::apiResource('sales', SaleController::class);
 
-    // Returns & Exchanges (will add later)
-    // Route::apiResource('returns', ReturnController::class);
+    // Returns & Exchanges
+    Route::apiResource('returns', ReturnController::class);
 
     // Reports (will add later)
     // Route::get('/reports/daily-sales', [ReportController::class, 'dailySales']);

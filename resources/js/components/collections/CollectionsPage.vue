@@ -6,17 +6,7 @@
         <div class="flex justify-between items-center py-6">
           <div>
             <h1 class="text-2xl font-bold text-gray-900">Collections</h1>
-            <p class="mt-1 text-sm text-gray-600">Manage your boutique collections and inventory</p>
           </div>
-          <button 
-            @click="showCreateModal = true"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            New Collection
-          </button>
         </div>
       </div>
     </div>
@@ -157,10 +147,13 @@
                   <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     XL
                   </th>
+                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Unstitched
+                  </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Discount
                   </th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th v-if="isAdmin" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -176,7 +169,6 @@
                       </div>
                       <div class="ml-4">
                         <div class="text-sm font-medium text-gray-900">{{ collection.name }}</div>
-                        <div class="text-sm text-gray-500">{{ collection.description || 'No description' }}</div>
                       </div>
                     </div>
                   </td>
@@ -221,43 +213,27 @@
                       {{ collection.size_breakdown?.XL || 0 }}
                     </span>
                   </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {{ collection.size_breakdown?.unstitched || 0 }}
+                    </span>
+                  </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <span v-if="collection.discount_active" class="text-green-600 font-medium">
                       {{ collection.discount_percentage }}%
                     </span>
                     <span v-else class="text-gray-400">No discount</span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div class="flex items-center justify-end space-x-2">
-                      <button 
-                        @click="editCollection(collection)"
-                        class="text-blue-600 hover:text-blue-900 p-1 rounded"
-                        title="Edit"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button 
-                        @click="viewCollection(collection)"
-                        class="text-green-600 hover:text-green-900 p-1 rounded"
-                        title="View Details"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
-                      <button 
-                        @click="deleteCollection(collection)"
-                        class="text-red-600 hover:text-red-900 p-1 rounded"
-                        title="Delete"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
+                  <td v-if="isAdmin" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button 
+                      @click="editCollection(collection)"
+                      class="text-blue-600 hover:text-blue-900 p-1 rounded"
+                      title="Edit"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -270,14 +246,8 @@
               </svg>
               <h3 class="text-lg font-medium text-gray-900 mb-2">No collections found</h3>
               <p class="text-gray-500 mb-4">
-                {{ searchTerm ? 'Try adjusting your search or filters.' : 'Create your first collection to get started.' }}
+                {{ searchTerm ? 'Try adjusting your search or filters.' : 'No collections found.' }}
               </p>
-              <button 
-                @click="showCreateModal = true"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-              >
-                Create Collection
-              </button>
             </div>
           </div>
         </div>
@@ -377,6 +347,9 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useAuthStore } from '../../stores/auth.js';
+
+const authStore = useAuthStore();
 
 const collections = ref([]);
 const loading = ref(true);
@@ -386,6 +359,23 @@ const showCreateModal = ref(false);
 const isEditing = ref(false);
 const saving = ref(false);
 const editingId = ref(null);
+
+// Role-based access control
+const isAdmin = computed(() => {
+  try {
+    const user = authStore.user;
+    const isAuthenticated = authStore.isAuthenticated;
+    
+    if (!isAuthenticated || !user || !user.role) {
+      return false;
+    }
+    
+    return user.role.toLowerCase() === 'admin';
+  } catch (error) {
+    console.error('Error in isAdmin computed:', error);
+    return false;
+  }
+});
 
 const formData = ref({
   name: '',
@@ -429,7 +419,7 @@ const filteredCollections = computed(() => {
 const loadCollections = async () => {
   try {
     loading.value = true;
-    const response = await window.axios.get('/collections');
+    const response = await window.axios.get('/api/collections');
     collections.value = Array.isArray(response.data) ? response.data : [];
   } catch (error) {
     console.error('Error loading collections:', error);
@@ -465,9 +455,9 @@ const submitForm = async () => {
     };
     
     if (isEditing.value) {
-      await window.axios.put(`/collections/${editingId.value}`, payload);
+      await window.axios.put(`/api/collections/${editingId.value}`, payload);
     } else {
-      await window.axios.post('/collections', payload);
+      await window.axios.post('/api/collections', payload);
     }
     
     await loadCollections();
@@ -500,7 +490,7 @@ const viewCollection = (collection) => {
 const deleteCollection = async (collection) => {
   if (confirm(`Are you sure you want to delete "${collection.name}"?`)) {
     try {
-      await window.axios.delete(`/collections/${collection.id}`);
+      await window.axios.delete(`/api/collections/${collection.id}`);
       await loadCollections();
     } catch (error) {
       console.error('Error deleting collection:', error);
@@ -509,7 +499,13 @@ const deleteCollection = async (collection) => {
   }
 };
 
-onMounted(() => {
-  loadCollections();
+onMounted(async () => {
+  try {
+    await authStore.checkAuth();
+    await loadCollections();
+  } catch (error) {
+    console.error('Error during component initialization:', error);
+    loading.value = false;
+  }
 });
 </script>

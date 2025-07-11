@@ -44,7 +44,7 @@
           <div class="dress-info space-y-2">
             <div class="flex justify-between items-start">
               <h4 class="text-sm font-bold text-gray-800">{{ foundDressItem.dress.name }}</h4>
-              <span class="text-xs font-medium px-2 py-1 bg-gray-100 rounded text-gray-700">{{ foundDressItem.size }}</span>
+              <span class="text-xs font-medium px-2 py-1 bg-gray-100 rounded text-gray-700">{{ foundDressItem.dress.size }}</span>
             </div>
             
             <div class="grid grid-cols-2 gap-2 text-xs">
@@ -173,7 +173,7 @@
             </button>
             <div class="flex-1 pr-8">
               <h4 class="font-medium">{{ item.dress.name }}</h4>
-              <p class="text-gray-600">{{ item.dress.collection.name }} • {{ item.size }}</p>
+              <p class="text-gray-600">{{ item.dress.collection.name }} • {{ item.dress.size }}</p>
               <p class="text-gray-500 font-mono">{{ item.barcode }}</p>
               <div class="flex flex-col gap-1 mt-1">
                 <div class="flex items-center justify-between">
@@ -250,7 +250,7 @@
             <span>Rs. {{ subtotal.toFixed(2) }}</span>
           </div>
           <div class="flex justify-between mb-1">
-            <span>Tax:</span>
+            <span>GST (18%):</span>
             <span>Rs. {{ tax.toFixed(2) }}</span>
           </div>
           <div class="flex justify-between text-sm font-bold border-t pt-1">
@@ -340,51 +340,24 @@
                   <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
                 </svg>
               </button>
-              <div class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs">
-                Code128 & QR
-              </div>
             </div>
             
             <!-- Instructions overlay -->
             <div class="absolute bottom-3 left-3 right-3 bg-black bg-opacity-70 text-white p-2 rounded text-center text-sm">
-              <div class="font-medium">Position barcode horizontally within the frame</div>
-              <div class="text-xs opacity-90">For Code128: align with center line | QR: fit in corners</div>
+              <div class="font-medium">Scan any barcode or QR code</div>
             </div>
           </div>
         </div>
         
         <!-- Info Section -->
         <div class="px-4 pb-4">
-          <div class="bg-gray-50 rounded-lg p-3 mb-4">
-            <div class="text-sm text-gray-700 space-y-1">
-              <div class="flex items-center gap-2">
-                <span class="text-green-600">✨</span>
-                <span class="font-medium">Auto-scanning active</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-blue-600">📱</span>
-                <span class="text-xs">Supports: QR Codes & Code128 Barcodes</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-orange-600">💡</span>
-                <span class="text-xs">Tip: Ensure good lighting and hold device steady</span>
-              </div>
-            </div>
-          </div>
-          
           <!-- Action buttons -->
-          <div class="grid grid-cols-2 gap-3">
+          <div class="w-full">
             <button 
               @click="stopBarcodeScanner" 
-              class="px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium"
+              class="w-full px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium"
             >
               ❌ Cancel
-            </button>
-            <button 
-              @click="captureBarcode" 
-              class="px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
-            >
-              ⌨️ Manual Entry
             </button>
           </div>
         </div>
@@ -456,9 +429,10 @@ export default {
 
     const tax = computed(() => {
       return cart.value.reduce((sum, item) => {
-        const price = item.final_price || item.dress.sale_price
+        // GST should be calculated on original price (before discount)
+        const originalPrice = item.dress.sale_price
         const taxPercentage = item.dress.tax_percentage || 0
-        return sum + (price * taxPercentage / 100)
+        return sum + (originalPrice * taxPercentage / 100)
       }, 0)
     })
 
