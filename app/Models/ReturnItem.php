@@ -17,6 +17,8 @@ class ReturnItem extends Model
         'return_type',
         'refund_amount',
         'exchange_item_id',
+        'exchange_sale_id',
+        'exchange_sale_item_id',
         'return_date',
         'notes'
     ];
@@ -44,6 +46,16 @@ class ReturnItem extends Model
     public function exchangeItem(): BelongsTo
     {
         return $this->belongsTo(DressItem::class, 'exchange_item_id');
+    }
+
+    public function exchangeSale(): BelongsTo
+    {
+        return $this->belongsTo(Sale::class, 'exchange_sale_id');
+    }
+
+    public function exchangeSaleItem(): BelongsTo
+    {
+        return $this->belongsTo(SaleItem::class, 'exchange_sale_item_id');
     }
 
     public function scopeReturns($query)

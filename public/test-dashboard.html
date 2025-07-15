@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TS-POS System Test - GST Refund & Resaleable Items</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .test-section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .test-section h2 { color: #2563eb; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+        .feature-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin: 20px 0; }
+        .feature-card { background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #10b981; }
+        .status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .status.completed { background: #dcfce7; color: #166534; }
+        .status.testing { background: #fef3c7; color: #92400e; }
+        .link-btn { display: inline-block; background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; margin: 5px; }
+        .link-btn:hover { background: #1d4ed8; }
+        .highlight { background: #fef9e7; padding: 15px; border-radius: 6px; border-left: 4px solid #f59e0b; margin: 15px 0; }
+        .calculation-example { background: #f0f9ff; padding: 15px; border-radius: 6px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 TS-POS System Test Dashboard</h1>
+        <p><strong>Latest Updates:</strong> GST-Compliant Refund System & Resaleable Item Sales</p>
+        
+        <div class="test-section">
+            <h2>🛒 POS System - Resaleable Items Test</h2>
+            <div class="feature-list">
+                <div class="feature-card">
+                    <h3>✅ Feature: Returned Resaleable Items</h3>
+                    <p><span class="status completed">COMPLETED</span></p>
+                    <p>Returned items with status <code>returned_resaleable</code> can now be sold immediately without quality approval.</p>
+                    <ul>
+                        <li>Updated POS logic to accept returned_resaleable items</li>
+                        <li>Visual indicator shows "Returned Item" in cart</li>
+                        <li>Backend validates and allows these sales</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="highlight">
+                <strong>🧪 Test Instructions:</strong>
+                <ol>
+                    <li>Go to POS page and scan/search for an item with status "returned_resaleable"</li>
+                    <li>Verify it shows "Add to Cart" button (not "Not Available")</li>
+                    <li>Add item to cart and complete sale</li>
+                    <li>Check that sale processes successfully</li>
+                </ol>
+            </div>
+            
+            <a href="http://localhost:8000/pos" class="link-btn" target="_blank">🛒 Test POS System</a>
+        </div>
+
+        <div class="test-section">
+            <h2>💰 Return System - GST Compliant Refunds</h2>
+            <div class="feature-list">
+                <div class="feature-card">
+                    <h3>✅ Auto GST Calculation</h3>
+                    <p><span class="status completed">COMPLETED</span></p>
+                    <p>System automatically calculates GST-inclusive refunds to ensure tax compliance.</p>
+                    <ul>
+                        <li>Refunds include full amount paid (base price + GST)</li>
+                        <li>Automatic calculation prevents manual errors</li>
+                        <li>Exchange calculations consider GST on both items</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>✅ Real-time Refund Preview</h3>
+                    <p><span class="status completed">COMPLETED</span></p>
+                    <p>Shows detailed breakdown before processing return.</p>
+                    <ul>
+                        <li>Original price breakdown</li>
+                        <li>GST amount display</li>
+                        <li>Total refund calculation</li>
+                        <li>Exchange price difference</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>✅ Tax Compliance</h3>
+                    <p><span class="status completed">COMPLETED</span></p>
+                    <p>Ensures proper GST handling per Pakistani tax requirements.</p>
+                    <ul>
+                        <li>Refunds full amount including GST</li>
+                        <li>Proper tax record keeping</li>
+                        <li>Validation against original payment</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="calculation-example">
+                <h3>📊 FIXED: Proper Discount + GST Calculation:</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 15px 0;">
+                    <div style="background: #fee2e2; padding: 15px; border-radius: 6px;">
+                        <h4 style="color: #dc2626; margin: 0 0 10px 0;">❌ BEFORE (Wrong):</h4>
+                        <p><strong>Original:</strong> PKR 6,000 + 18% GST = PKR 7,080</p>
+                        <p><strong>Exchange:</strong> PKR 6,500 + 18% GST = PKR 7,670</p>
+                        <p><strong>Problem:</strong> GST calculated on full price, discount ignored!</p>
+                        <p style="color: #dc2626;"><strong>Result:</strong> Wrong calculations, tax non-compliance</p>
+                    </div>
+                    <div style="background: #dcfce7; padding: 15px; border-radius: 6px;">
+                        <h4 style="color: #166534; margin: 0 0 10px 0;">✅ AFTER (Correct):</h4>
+                        <p><strong>Original:</strong> PKR 6,000 - PKR 300 discount = PKR 5,700 + 18% GST = PKR 6,726</p>
+                        <p><strong>Exchange:</strong> PKR 6,500 - PKR 325 discount = PKR 6,175 + 18% GST = PKR 7,287</p>
+                        <p><strong>Fixed:</strong> Discount applied BEFORE GST calculation</p>
+                        <p style="color: #166534;"><strong>Result:</strong> Accurate amounts, proper tax compliance</p>
+                    </div>
+                </div>
+                <p><strong>✅ Key Fix:</strong> System now calculates discounts first, then applies GST on the discounted amount (proper accounting sequence)</p>
+            </div>
+            
+            <div class="highlight">
+                <strong>🧪 Updated Test Instructions:</strong>
+                <ol>
+                    <li>Go to Returns page and select a sale item <strong>that had discount applied</strong></li>
+                    <li>Verify refund amount shows correct total (discount + GST properly calculated)</li>
+                    <li>Check breakdown shows: Base Price → Discount → Discounted Price → GST → Total</li>
+                    <li>Test exchange scenario - verify exchange item gets same discount percentages</li>
+                    <li>Confirm GST is calculated on discounted amount, not original price</li>
+                    <li>Process return and verify accounting is accurate</li>
+                </ol>
+                <p><strong>🎯 Focus:</strong> Ensure discounts are applied BEFORE GST calculation for proper tax compliance</p>
+            </div>
+            
+            <a href="http://localhost:8000/returns" class="link-btn" target="_blank">💰 Test Return System</a>
+            <a href="http://localhost:8000/api/returns/calculate-refund?sale_item_id=1" class="link-btn" target="_blank">🔍 Test API Calculation</a>
+        </div>
+
+        <div class="test-section">
+            <h2>🔄 Exchange Sale Tracking - MAJOR FIX</h2>
+            <div class="feature-list">
+                <div class="feature-card">
+                    <h3>🆕 Complete Exchange Audit Trail</h3>
+                    <p><span class="status completed">IMPLEMENTED</span></p>
+                    <p>Exchanges now create proper sale records for complete traceability.</p>
+                    <ul>
+                        <li>New Sale record created for each exchange</li>
+                        <li>New SaleItem record with proper links</li>
+                        <li>Exchange items can be returned later</li>
+                        <li>Complete financial tracking</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>📊 Database Schema Enhanced</h3>
+                    <p><span class="status completed">MIGRATED</span></p>
+                    <p>Added tracking fields for exchange sales.</p>
+                    <ul>
+                        <li>returns.exchange_sale_id</li>
+                        <li>returns.exchange_sale_item_id</li>
+                        <li>sale_items.exchange_return_id</li>
+                        <li>sale_items.is_exchange_item</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>🔗 Bidirectional Linking</h3>
+                    <p><span class="status completed">LINKED</span></p>
+                    <p>Complete relationship mapping for exchanges.</p>
+                    <ul>
+                        <li>Return → Exchange Sale</li>
+                        <li>Exchange Sale → Original Return</li>
+                        <li>Future Return → Exchange History</li>
+                        <li>Full chain traceability</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="calculation-example">
+                <h3>🔄 Exchange Process Flow:</h3>
+                <div style="background: #f0f9ff; padding: 15px; border-radius: 6px; margin: 10px 0;">
+                    <h4 style="color: #0369a1; margin: 0 0 10px 0;">Before Fix (❌ Broken):</h4>
+                    <p>1. Customer returns Item A</p>
+                    <p>2. Customer gets Item B</p>
+                    <p>3. Item B marked as "sold" but NO sale record</p>
+                    <p>4. ❌ Cannot return Item B later (no sale_item_id)</p>
+                </div>
+                <div style="background: #dcfce7; padding: 15px; border-radius: 6px; margin: 10px 0;">
+                    <h4 style="color: #166534; margin: 0 0 10px 0;">After Fix (✅ Complete):</h4>
+                    <p>1. Customer returns Item A → Return Record</p>
+                    <p>2. Customer gets Item B → NEW Sale Record + NEW SaleItem Record</p>
+                    <p>3. Links: Return ↔ Exchange Sale ↔ SaleItem</p>
+                    <p>4. ✅ Item B can be returned later (has proper sale_item_id)</p>
+                    <p>5. ✅ Complete audit trail maintained</p>
+                </div>
+            </div>
+            
+            <div class="highlight">
+                <strong>🧪 CRITICAL Test Instructions:</strong>
+                <ol>
+                    <li>Process an exchange in the returns page</li>
+                    <li>Check database: New records in 'sales' and 'sale_items' tables</li>
+                    <li>Verify exchange_sale_id and exchange_sale_item_id are populated</li>
+                    <li><strong>Try returning the exchanged item later</strong></li>
+                    <li>Confirm it works properly with proper sale history</li>
+                    <li>Check invoice generation for exchange sales</li>
+                </ol>
+                <p><strong>🎯 Key Test:</strong> Exchange an item, then try to return the exchanged item - it should work!</p>
+            </div>
+            
+            <a href="http://localhost:8000/returns" class="link-btn" target="_blank">🔄 Test Exchange System</a>
+            <a href="http://localhost:8000/sales" class="link-btn" target="_blank">📊 Check Exchange Sales</a>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 System Status & Quick Links</h2>
+            <div class="feature-list">
+                <div class="feature-card">
+                    <h3>🖥️ Frontend</h3>
+                    <p><span class="status completed">BUILT</span></p>
+                    <ul>
+                        <li>Vue.js components updated</li>
+                        <li>Reactive refund calculations</li>
+                        <li>Real-time UI updates</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>⚙️ Backend</h3>
+                    <p><span class="status completed">UPDATED</span></p>
+                    <ul>
+                        <li>Enhanced ReturnController</li>
+                        <li>New API endpoints</li>
+                        <li>GST calculation methods</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>🔄 Integration</h3>
+                    <p><span class="status testing">READY FOR TEST</span></p>
+                    <ul>
+                        <li>POS ↔ Return system</li>
+                        <li>API ↔ Frontend</li>
+                        <li>Database consistency</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h3>🔗 Quick Access Links:</h3>
+            <a href="http://localhost:8000" class="link-btn" target="_blank">🏠 Dashboard</a>
+            <a href="http://localhost:8000/pos" class="link-btn" target="_blank">🛒 POS System</a>
+            <a href="http://localhost:8000/returns" class="link-btn" target="_blank">💰 Returns</a>
+            <a href="http://localhost:8000/dress-items" class="link-btn" target="_blank">👗 Inventory</a>
+            <a href="http://localhost:8000/sales" class="link-btn" target="_blank">📈 Sales</a>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Key Improvements Summary</h2>
+            <div class="highlight">
+                <h3>🆕 NEW: Complete Exchange Sale Tracking</h3>
+                <p><strong>Critical Fix:</strong> Exchanges now create proper sale records</p>
+                <p><strong>Impact:</strong> Exchanged items can be returned later with full audit trail</p>
+            </div>
+            
+            <div class="highlight">
+                <h3>✅ Problem Solved: POS Resaleable Items</h3>
+                <p><strong>Before:</strong> Returned resaleable items showed "Not Available" in POS</p>
+                <p><strong>After:</strong> Returned resaleable items can be sold immediately with "Add to Cart" button</p>
+            </div>
+            
+            <div class="highlight">
+                <h3>✅ Problem Solved: Discount + GST Calculation Sequence</h3>
+                <p><strong>Before:</strong> GST calculated on full price, discounts applied incorrectly in exchange calculations</p>
+                <p><strong>After:</strong> Proper accounting sequence - Discount → GST → Total (ensures tax compliance and accurate exchange calculations)</p>
+            </div>
+            
+            <div class="highlight">
+                <h3>✅ Business Benefits</h3>
+                <ul>
+                    <li><strong>Operational Efficiency:</strong> Simplified return workflow, no quality approval needed</li>
+                    <li><strong>Tax Compliance:</strong> Automatic GST-inclusive refunds per Pakistani requirements</li>
+                    <li><strong>Error Prevention:</strong> Auto-calculated refunds eliminate manual calculation errors</li>
+                    <li><strong>Customer Satisfaction:</strong> Fair refunds and faster processing</li>
+                    <li><strong>Financial Accuracy:</strong> Proper tax record keeping and validation</li>
+                    <li><strong>🆕 Complete Audit Trail:</strong> Exchange items can be returned with full history</li>
+                    <li><strong>🆕 Proper Sale Records:</strong> Every exchange creates trackable sale data</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 TS-POS Test Dashboard Loaded');
+            console.log('✅ Ready to test GST-compliant refund system');
+            console.log('✅ Ready to test resaleable item sales');
+            
+            // Test API endpoint availability
+            fetch('/api/returns/calculate-refund?sale_item_id=1')
+                .then(response => {
+                    if (response.ok) {
+                        console.log('✅ API endpoint working');
+                    } else {
+                        console.log('⚠️ API endpoint may need testing with valid sale_item_id');
+                    }
+                })
+                .catch(err => console.log('ℹ️ API test - ensure Laravel server is running'));
+        });
+    </script>
+</body>
+</html>

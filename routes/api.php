@@ -56,7 +56,7 @@ Route::prefix('sales')->group(function () {
             foreach ($request->items as $item) {
                 $dressItem = \App\Models\DressItem::with(['dress.collection'])->find($item['dress_item_id']);
                 
-                if (!$dressItem || $dressItem->status !== 'available') {
+                if (!$dressItem || !in_array($dressItem->status, ['available', 'returned_resaleable'])) {
                     return response()->json(['error' => "Item with barcode {$item['barcode']} is not available"], 400);
                 }
 
@@ -149,7 +149,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         $totalSales = \App\Models\Sale::sum('total_amount');
         $todaySales = \App\Models\Sale::whereDate('created_at', today())->sum('total_amount');
         $totalItems = \App\Models\DressItem::count();
-        $availableItems = \App\Models\DressItem::where('status', 'available')->count();
+        $availableItems = \App\Models\DressItem::whereIn('status', ['available', 'returned_resaleable'])->count();
         $soldItems = \App\Models\DressItem::where('status', 'sold')->count();
         $lowStockItems = \App\Models\Dress::whereHas('dressItems', function($query) {
             $query->where('status', 'available');
@@ -171,6 +171,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Dress Items (Individual pieces) - specific routes first
     Route::get('/dress-items/available', [DressItemController::class, 'getAvailableForExchange']);
+    Route::get('/dress-items/resaleable', [DressItemController::class, 'getResaleableItems']);
+    Route::put('/dress-items/{dressItem}/make-available', [DressItemController::class, 'makeAvailable']);
+    Route::put('/dress-items/{dressItem}/mark-damaged', [DressItemController::class, 'markDamaged']);
     Route::get('/dress-items/barcode/{barcode}', [DressItemController::class, 'getByBarcode']);
     Route::put('/dress-items/{dressItem}/discount', [DressItemController::class, 'updateDiscount']);
     Route::post('/validate-barcode', [DressItemController::class, 'validateBarcode']);
@@ -181,8 +184,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/sales/{sale}/invoice', [SaleController::class, 'generateInvoice']);
     Route::apiResource('sales', SaleController::class);
 
-    // Returns & Exchanges
-    Route::apiResource('returns', ReturnController::class);
+    // Modern Returns & Exchanges
+    Route::get('/returns/search/{query}', [App\Http\Controllers\Api\ModernReturnController::class, 'search']);
+    Route::get('/returns/recent', [App\Http\Controllers\Api\ModernReturnController::class, 'recent']);
+    Route::get('/returns/stats', [App\Http\Controllers\Api\ModernReturnController::class, 'stats']);
+    Route::post('/returns', [App\Http\Controllers\Api\ModernReturnController::class, 'store']);
 
     // Reports (will add later)
     // Route::get('/reports/daily-sales', [ReportController::class, 'dailySales']);

@@ -1,23 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <div class="bg-white shadow-sm border-b">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center py-6">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">Returns & Exchanges</h1>
-            <p class="text-gray-600 mt-1">Process customer returns and exchanges</p>
-          </div>
-          <div class="flex items-center gap-4">
-            <button 
-              v-if="isAdmin"
-              @click="showCreateModal = true"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
-              Process Return
+  <div>
+    <ModernReturnsInterface />
+  </div>
+</template>
+
+<script setup>
+import ModernReturnsInterface from './ModernReturnsInterface.vue'
+</script>
             </button>
           </div>
         </div>
@@ -226,22 +215,41 @@
                             Barcode: {{ returnItem.exchange_item?.barcode || 'N/A' }} |
                             Price: PKR {{ returnItem.exchange_item?.dress?.sale_price || '0.00' }}
                           </div>
+                          <div v-if="returnItem.exchange_sale_id" class="text-xs text-blue-600 mt-1">
+                            📄 Exchange Sale: {{ returnItem.exchange_sale?.invoice_number || `#${returnItem.exchange_sale_id}` }}
+                            <span v-if="returnItem.exchange_sale_item_id" class="ml-2">
+                              | Sale Item: #{{ returnItem.exchange_sale_item_id }}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <span 
-                      :class="returnItem.return_type === 'return' 
-                        ? 'bg-red-100 text-red-800' 
-                        : 'bg-blue-100 text-blue-800'"
-                      class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                    >
-                      {{ returnItem.return_type === 'return' ? 'Return' : 'Exchange' }}
-                    </span>
+                    <div class="flex flex-col gap-1">
+                      <span 
+                        :class="returnItem.return_type === 'return' 
+                          ? 'bg-red-100 text-red-800' 
+                          : 'bg-blue-100 text-blue-800'"
+                        class="inline-flex px-2 py-1 text-xs font-semibold rounded-full w-fit"
+                      >
+                        {{ returnItem.return_type === 'return' ? 'Return' : 'Exchange' }}
+                      </span>
+                      <span 
+                        :class="getReturnStatusInfo(returnItem).badgeClass"
+                        class="inline-flex px-2 py-1 text-xs font-semibold rounded-full w-fit"
+                      >
+                        {{ getReturnStatusInfo(returnItem).statusText }}
+                      </span>
+                    </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ formatReturnReason(returnItem.return_reason) }}
+                    <div class="flex flex-col">
+                      <span class="font-medium">{{ formatReturnReason(returnItem.return_reason) }}</span>
+                      <span :class="getReturnStatusInfo(returnItem).statusClass" class="text-xs mt-1">
+                        {{ getReturnStatusInfo(returnItem).isResaleable ? 'Can be resold' : 'Cannot be resold' }}
+                      </span>
+                    </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <span class="font-medium text-green-600">PKR {{ returnItem.refund_amount || '0.00' }}</span>
@@ -355,16 +363,35 @@
             <!-- Search Results -->
             <div v-if="searchResults.length > 0" class="mb-4">
               <h5 class="text-sm font-medium text-gray-900 mb-2">Found Items:</h5>
+              <div v-if="selectedSoldItem" class="mb-2 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-700 flex justify-between items-center">
+                <span>✅ Item selected! Click "Next" to continue or select a different item.</span>
+                <button 
+                  @click="clearSearch"
+                  class="text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  Clear Search
+                </button>
+              </div>
               <div class="space-y-2 max-h-60 overflow-y-auto">
                 <div 
                   v-for="item in searchResults" 
                   :key="item.id" 
                   @click="selectSoldItem(item)"
-                  class="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  :class="{
+                    'border-blue-500 bg-blue-50': selectedSoldItem && selectedSoldItem.id === item.id,
+                    'border-gray-200 hover:bg-gray-50': !selectedSoldItem || selectedSoldItem.id !== item.id
+                  }"
+                  class="p-3 border rounded-lg cursor-pointer transition-colors"
                 >
                   <div class="flex justify-between items-start">
                     <div>
-                      <div class="font-medium text-gray-900">{{ item.dress_name }}</div>
+                      <div class="font-medium text-gray-900">
+                        {{ item.dress_name }}
+                        <span v-if="selectedSoldItem && selectedSoldItem.id === item.id" 
+                              class="ml-2 text-xs bg-blue-600 text-white px-2 py-1 rounded">
+                          SELECTED
+                        </span>
+                      </div>
                       <div class="text-sm text-gray-500">
                         Collection: {{ item.collection_name }} | Size: {{ item.size }}
                       </div>
@@ -376,8 +403,37 @@
                       </div>
                     </div>
                     <div class="text-right">
-                      <div class="font-medium text-gray-900">PKR {{ item.sale_price }}</div>
-                      <div class="text-sm text-gray-500">{{ item.sale?.customer_name || 'Walk-in' }}</div>
+                      <div class="text-xs text-gray-600 space-y-1">
+                        <div class="flex justify-between items-center min-w-32">
+                          <span>Sale Price:</span>
+                          <span class="font-medium">PKR {{ item.sale_price || '0.00' }}</span>
+                        </div>
+                        <div v-if="item.collection_discount_percentage && parseFloat(item.collection_discount_percentage) > 0" class="flex justify-between items-center text-red-600">
+                          <span>Collection Discount ({{ item.collection_discount_percentage }}%):</span>
+                          <span class="font-medium">-PKR {{ (parseFloat(item.sale_price || 0) * parseFloat(item.collection_discount_percentage || 0) / 100).toFixed(2) }}</span>
+                        </div>
+                        <div v-if="item.dress_discount_percentage && parseFloat(item.dress_discount_percentage) > 0" class="flex justify-between items-center text-red-600">
+                          <span>Dress Discount ({{ item.dress_discount_percentage }}%):</span>
+                          <span class="font-medium">-PKR {{ (parseFloat(item.sale_price || 0) * parseFloat(item.dress_discount_percentage || 0) / 100).toFixed(2) }}</span>
+                        </div>
+                        <div v-if="item.size_discount_percentage && parseFloat(item.size_discount_percentage) > 0" class="flex justify-between items-center text-red-600">
+                          <span>Size Discount ({{ item.size_discount_percentage }}%):</span>
+                          <span class="font-medium">-PKR {{ (parseFloat(item.sale_price || 0) * parseFloat(item.size_discount_percentage || 0) / 100).toFixed(2) }}</span>
+                        </div>
+                        <div v-if="item.total_discount_amount && parseFloat(item.total_discount_amount) > 0" class="flex justify-between items-center text-red-600 border-t border-red-200 pt-1">
+                          <span>Total Discount:</span>
+                          <span class="font-medium">-PKR {{ item.total_discount_amount || '0.00' }}</span>
+                        </div>
+                        <div v-if="item.tax_amount && parseFloat(item.tax_amount) > 0" class="flex justify-between items-center text-green-600">
+                          <span>GST ({{ item.tax_percentage || 18 }}%):</span>
+                          <span class="font-medium">+PKR {{ item.tax_amount || '0.00' }}</span>
+                        </div>
+                        <div class="flex justify-between items-center font-bold text-gray-900 pt-1 border-t border-gray-200">
+                          <span>Total Paid:</span>
+                          <span>PKR {{ item.item_total || item.sale_price }}</span>
+                        </div>
+                      </div>
+                      <div class="text-sm text-gray-500 mt-1">{{ item.sale?.customer_name || 'Walk-in' }}</div>
                     </div>
                   </div>
                 </div>
@@ -401,7 +457,7 @@
                 Collection: {{ selectedSoldItem.collection_name }} | Size: {{ selectedSoldItem.size }}
               </div>
               <div class="text-sm text-gray-500">
-                Sold Price: PKR {{ selectedSoldItem.sale_price }} | Invoice: {{ selectedSoldItem.sale?.invoice_number }}
+                Sold Price: PKR {{ selectedSoldItem.item_total || selectedSoldItem.sale_price }} | Invoice: {{ selectedSoldItem.sale?.invoice_number }}
               </div>
             </div>
 
@@ -493,11 +549,84 @@
                   {{ returnFormData.return_type === 'exchange' ? 'Price Difference:' : 'Refund Amount:' }}
                 </span>
                 <span class="font-bold text-lg text-green-600">
-                  PKR {{ calculateRefundAmount() }}
+                  PKR {{ computedRefundAmount }}
                 </span>
               </div>
-              <div v-if="returnFormData.return_type === 'exchange' && selectedExchangeItem" class="text-sm text-gray-600 mt-1">
-                Original: PKR {{ selectedSoldItem.sale_price }} | 
+              
+              <!-- Detailed Breakdown with Proper Discount and GST Display -->
+              <div v-if="refundBreakdown" class="text-sm text-gray-600 mt-2 space-y-1">
+                <!-- Original Item Breakdown -->
+                <div class="border-b pb-2 mb-2">
+                  <div class="text-xs font-medium text-gray-700 mb-1">Original Item:</div>
+                  <div class="flex justify-between">
+                    <span>Base Price:</span>
+                    <span>PKR {{ parseFloat(refundBreakdown.original_item?.sale_price || 0).toFixed(2) }}</span>
+                  </div>
+                  <div v-if="(refundBreakdown.original_item?.total_discount_amount || 0) > 0" class="flex justify-between text-red-600">
+                    <span>Discount Applied:</span>
+                    <span>-PKR {{ parseFloat(refundBreakdown.original_item?.total_discount_amount || 0).toFixed(2) }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>Price After Discount:</span>
+                    <span>PKR {{ parseFloat(refundBreakdown.original_item?.price_after_discount || 0).toFixed(2) }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>GST (on discounted price):</span>
+                    <span>PKR {{ parseFloat(refundBreakdown.original_item?.tax_amount || 0).toFixed(2) }}</span>
+                  </div>
+                  <div class="border-t pt-1 flex justify-between font-medium">
+                    <span>Total Paid:</span>
+                    <span>PKR {{ parseFloat(refundBreakdown.original_item?.total_paid || 0).toFixed(2) }}</span>
+                  </div>
+                </div>
+                
+                <!-- Exchange Details -->
+                <div v-if="refundBreakdown.exchange_item" class="border-b pb-2 mb-2">
+                  <div class="text-xs font-medium text-gray-700 mb-1">Exchange Item:</div>
+                  <div class="flex justify-between">
+                    <span>Base Price:</span>
+                    <span>PKR {{ parseFloat(refundBreakdown.exchange_item?.original_price || 0).toFixed(2) }}</span>
+                  </div>
+                  <div v-if="(refundBreakdown.exchange_item?.total_discount_amount || 0) > 0" class="flex justify-between text-red-600">
+                    <span>Discount Applied:</span>
+                    <span>-PKR {{ parseFloat(refundBreakdown.exchange_item?.total_discount_amount || 0).toFixed(2) }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>Price After Discount:</span>
+                    <span>PKR {{ parseFloat(refundBreakdown.exchange_item?.discounted_price || 0).toFixed(2) }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>GST ({{ parseFloat(refundBreakdown.exchange_item?.tax_percentage || 0) }}%):</span>
+                    <span>PKR {{ parseFloat(refundBreakdown.exchange_item?.tax_amount || 0).toFixed(2) }}</span>
+                  </div>
+                  <div class="border-t pt-1 flex justify-between font-medium">
+                    <span>Exchange Total:</span>
+                    <span>PKR {{ parseFloat(refundBreakdown.exchange_item?.total_with_gst || 0).toFixed(2) }}</span>
+                  </div>
+                </div>
+                
+                <!-- Final Calculation -->
+                <div class="bg-green-50 p-2 rounded">
+                  <div v-if="refundBreakdown.additional_payment_required > 0" class="flex justify-between text-orange-600 font-medium">
+                    <span>Customer Pays Additional:</span>
+                    <span>PKR {{ parseFloat(refundBreakdown.additional_payment_required).toFixed(2) }}</span>
+                  </div>
+                  <div v-else class="flex justify-between text-green-600 font-medium">
+                    <span>Customer Receives:</span>
+                    <span>PKR {{ parseFloat(refundBreakdown.refund_amount).toFixed(2) }}</span>
+                  </div>
+                  <div v-if="refundBreakdown.message" class="text-xs text-gray-600 mt-1">
+                    {{ refundBreakdown.message }}
+                  </div>
+                  <div v-if="refundBreakdown.accounting_note" class="text-xs text-blue-600 mt-1 italic">
+                    ℹ️ {{ refundBreakdown.accounting_note }}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Fallback display -->
+              <div v-else-if="returnFormData.return_type === 'exchange' && selectedExchangeItem" class="text-sm text-gray-600 mt-1">
+                Original: PKR {{ selectedSoldItem.item_total || selectedSoldItem.sale_price }} | 
                 Exchange: PKR {{ selectedExchangeItem.dress.sale_price }}
               </div>
             </div>
@@ -624,7 +753,7 @@
 </template>
 
 <script>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../../stores/auth'
 
@@ -676,9 +805,18 @@ export default {
     const exchangeItems = ref([])
     const selectedExchangeItem = ref(null)
     const isProcessing = ref(false)
+    const refundBreakdown = ref(null)
     
     // Computed
     const isAdmin = computed(() => authStore.user?.role === 'admin')
+    
+    // Computed refund amount that updates reactively
+    const computedRefundAmount = computed(() => {
+      if (refundBreakdown.value) {
+        return parseFloat(refundBreakdown.value.refund_amount).toFixed(2)
+      }
+      return '0.00'
+    })
     
     const filteredReturns = computed(() => {
       let filtered = returns.value
@@ -746,6 +884,7 @@ export default {
       isSearching.value = true
       searchError.value = ''
       searchResults.value = []
+      selectedSoldItem.value = null // Clear previous selection
       
       try {
         const response = await axios.get(`/api/sales/search-items?query=${encodeURIComponent(searchQuery.value)}`)
@@ -753,6 +892,9 @@ export default {
         
         if (searchResults.value.length === 0) {
           searchError.value = 'No sold items found with this barcode or invoice number'
+        } else if (searchResults.value.length === 1) {
+          // Auto-select if only one result found
+          await selectSoldItem(searchResults.value[0])
         }
       } catch (error) {
         searchError.value = 'Error searching for items. Please try again.'
@@ -762,10 +904,21 @@ export default {
       }
     }
     
-    const selectSoldItem = (item) => {
+    const selectSoldItem = async (item) => {
       selectedSoldItem.value = item
+      // Don't clear search results immediately - let user see what was selected
+      
+      // Calculate refund amount when item is selected
+      if (returnFormData.return_type) {
+        await calculateRefundAmount()
+      }
+    }
+
+    const clearSearch = () => {
       searchResults.value = []
       searchQuery.value = ''
+      selectedSoldItem.value = null
+      searchError.value = ''
     }
     
     const searchExchangeItems = async () => {
@@ -788,20 +941,52 @@ export default {
       returnFormData.exchange_item_id = item.id
     }
     
-    const calculateRefundAmount = () => {
-      if (!selectedSoldItem.value) return '0.00'
-      
-      if (returnFormData.return_type === 'return') {
-        return parseFloat(selectedSoldItem.value.sale_price).toFixed(2)
+    const calculateRefundAmount = async () => {
+      if (!selectedSoldItem.value) {
+        refundBreakdown.value = null
+        return '0.00'
       }
       
-      if (returnFormData.return_type === 'exchange' && selectedExchangeItem.value) {
-        const difference = parseFloat(selectedSoldItem.value.sale_price) - parseFloat(selectedExchangeItem.value.dress.sale_price)
-        return Math.abs(difference).toFixed(2)
+      try {
+        // Call backend API to get accurate refund calculation with proper discount and GST handling
+        const response = await axios.post('/api/returns/calculate-refund', {
+          sale_item_id: selectedSoldItem.value.id,
+          return_type: returnFormData.return_type,
+          exchange_item_id: returnFormData.return_type === 'exchange' ? returnFormData.exchange_item_id : null
+        })
+        
+        if (response.data.success) {
+          refundBreakdown.value = response.data.calculation
+          const refundAmount = parseFloat(response.data.calculation.refund_amount)
+          return refundAmount.toFixed(2)
+        }
+      } catch (error) {
+        console.error('Error calculating refund:', error)
+        refundBreakdown.value = null
+        // Fallback to simplified calculation
+        if (returnFormData.return_type === 'return') {
+          // Use item_total which includes discount and GST
+          return parseFloat(selectedSoldItem.value.item_total || selectedSoldItem.value.sale_price).toFixed(2)
+        }
+        
+        if (returnFormData.return_type === 'exchange' && selectedExchangeItem.value) {
+          const originalTotal = parseFloat(selectedSoldItem.value.item_total || selectedSoldItem.value.sale_price)
+          const exchangePrice = parseFloat(selectedExchangeItem.value.dress.sale_price)
+          // Note: This is a simplified fallback - doesn't include proper discount/GST calculation
+          const difference = originalTotal - exchangePrice
+          return Math.max(0, difference).toFixed(2)
+        }
       }
       
       return '0.00'
     }
+    
+    // Watch for changes and recalculate refund
+    watch([() => returnFormData.return_type, () => returnFormData.exchange_item_id], async () => {
+      if (selectedSoldItem.value) {
+        await calculateRefundAmount()
+      }
+    })
     
     const processReturn = async () => {
       if (!canProcessReturn.value) return
@@ -814,7 +999,7 @@ export default {
           dress_item_id: selectedSoldItem.value.dress_item_id,
           return_type: returnFormData.return_type,
           return_reason: returnFormData.return_reason,
-          refund_amount: calculateRefundAmount(),
+          // Remove refund_amount - let backend calculate it automatically
           notes: returnFormData.notes,
           ...(returnFormData.exchange_item_id && { exchange_item_id: returnFormData.exchange_item_id })
         }
@@ -1113,6 +1298,18 @@ export default {
       }
       return reasons[reason] || reason
     }
+
+    const getReturnStatusInfo = (returnItem) => {
+      const resaleableReasons = ['wrong_size', 'customer_request']
+      const isResaleable = resaleableReasons.includes(returnItem.return_reason)
+      
+      return {
+        isResaleable,
+        statusText: isResaleable ? 'Resaleable' : 'Non-Resaleable',
+        statusClass: isResaleable ? 'text-green-600' : 'text-red-600',
+        badgeClass: isResaleable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+      }
+    }
     
     // Lifecycle
     onMounted(() => {
@@ -1156,6 +1353,7 @@ export default {
       fetchReturns,
       searchSoldItem,
       selectSoldItem,
+      clearSearch,
       searchExchangeItems,
       selectExchangeItem,
       calculateRefundAmount,
@@ -1164,7 +1362,8 @@ export default {
       printReturnSlip,
       closeModal,
       formatDate,
-      formatReturnReason
+      formatReturnReason,
+      getReturnStatusInfo
     }
   }
 }

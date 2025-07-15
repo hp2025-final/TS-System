@@ -78,14 +78,19 @@
                 <span class="font-semibold">Rs. {{ foundDressItem.dress.sale_price }}</span>
               </div>
               
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-gray-600">GST ({{ foundDressItem.tax_percentage ?? foundDressItem.dress.tax_percentage ?? 18 }}%):</span>
+                <span class="text-blue-600 font-medium">+Rs. {{ foundDressItem.tax_amount ?? ((foundDressItem.dress.sale_price * (foundDressItem.dress.tax_percentage ?? 18)) / 100).toFixed(2) }}</span>
+              </div>
+              
               <div v-if="getHighestDiscount(foundDressItem)" class="flex justify-between items-center mb-1">
                 <span class="text-gray-600">Discount ({{ getDiscountLevel(foundDressItem) }}):</span>
                 <span class="text-red-500 font-medium">{{ getHighestDiscount(foundDressItem) }}% (-Rs. {{ foundDressItem.total_discount }})</span>
               </div>
               
               <div class="flex justify-between items-center border-t pt-1">
-                <span class="text-gray-800 font-medium">Discounted Price:</span>
-                <span class="text-lg font-bold text-green-600">Rs. {{ foundDressItem.final_price || foundDressItem.dress.sale_price }}</span>
+                <span class="text-gray-800 font-bold">Final Total:</span>
+                <span class="text-xl font-bold text-green-700">Rs. {{ foundDressItem.final_price_with_tax ?? ((foundDressItem.final_price ?? foundDressItem.dress.sale_price) + parseFloat(foundDressItem.tax_amount ?? ((foundDressItem.dress.sale_price * (foundDressItem.dress.tax_percentage ?? 18)) / 100))).toFixed(2) }}</span>
               </div>
             </div>
             
@@ -97,7 +102,7 @@
               </div>
               
               <button 
-                v-if="foundDressItem.status === 'available'"
+                v-if="foundDressItem.status === 'available' || foundDressItem.status === 'returned_resaleable'"
                 @click="addToCart(foundDressItem)"
                 class="w-full px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm font-medium flex items-center justify-center gap-2"
               >
@@ -105,6 +110,9 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5L12 8m0 0l3-3m-3 3l-3-3" />
                 </svg>
                 Add to Cart
+                <span v-if="foundDressItem.status === 'returned_resaleable'" class="text-xs bg-white bg-opacity-20 px-1 rounded">
+                  (Returned Item)
+                </span>
               </button>
               <button 
                 v-else
@@ -180,13 +188,17 @@
                   <span class="text-gray-600">Actual Price:</span>
                   <span class="text-gray-800">Rs. {{ item.dress.sale_price }}</span>
                 </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-blue-600">GST ({{ item.dress.tax_percentage || 18 }}%):</span>
+                  <span class="text-blue-600">+Rs. {{ ((item.dress.sale_price * (item.dress.tax_percentage || 18)) / 100).toFixed(2) }}</span>
+                </div>
                 <div v-if="item.total_discount > 0" class="flex items-center justify-between">
-                  <span class="text-gray-600">Discount:</span>
-                  <span class="text-red-500">-Rs. {{ item.total_discount }}</span>
+                  <span class="text-red-500">Discount ({{ getDiscountLevel(item) }}): {{ getHighestDiscount(item) }}%</span>
+                  <span class="text-red-500">(-Rs. {{ item.total_discount }})</span>
                 </div>
                 <div class="flex items-center justify-between border-t pt-1">
-                  <span class="font-medium text-gray-800">Discounted Price:</span>
-                  <span class="font-semibold text-green-600">Rs. {{ item.final_price || item.dress.sale_price }}</span>
+                  <span class="font-medium text-gray-800">Final Total:</span>
+                  <span class="font-semibold text-green-600">Rs. {{ (parseFloat(item.dress.sale_price) + ((item.dress.sale_price * (item.dress.tax_percentage || 18)) / 100) - parseFloat(item.total_discount || 0)).toFixed(2) }}</span>
                 </div>
               </div>
             </div>
@@ -245,16 +257,8 @@
 
         <!-- Compact Total -->
         <div class="cart-total mb-4 text-xs">
-          <div class="flex justify-between mb-1">
-            <span>Subtotal:</span>
-            <span>Rs. {{ subtotal.toFixed(2) }}</span>
-          </div>
-          <div class="flex justify-between mb-1">
-            <span>GST (18%):</span>
-            <span>Rs. {{ tax.toFixed(2) }}</span>
-          </div>
           <div class="flex justify-between text-sm font-bold border-t pt-1">
-            <span>Total:</span>
+            <span>Final Total:</span>
             <span>Rs. {{ total.toFixed(2) }}</span>
           </div>
         </div>
@@ -414,6 +418,13 @@ export default {
     const currentStream = ref(null)
     
     // Computed properties
+    const originalPriceSum = computed(() => {
+      return cart.value.reduce((sum, item) => {
+        const originalPrice = item.dress.sale_price
+        return sum + parseFloat(originalPrice)
+      }, 0)
+    })
+
     const subtotal = computed(() => {
       return cart.value.reduce((sum, item) => {
         const price = item.final_price || item.dress.sale_price
@@ -431,13 +442,14 @@ export default {
       return cart.value.reduce((sum, item) => {
         // GST should be calculated on original price (before discount)
         const originalPrice = item.dress.sale_price
-        const taxPercentage = item.dress.tax_percentage || 0
+        const taxPercentage = item.dress.tax_percentage || 18
         return sum + (originalPrice * taxPercentage / 100)
       }, 0)
     })
 
     const total = computed(() => {
-      return subtotal.value + tax.value
+      // Correct calculation: (Original Price + GST) - Discounts
+      return originalPriceSum.value + tax.value - totalDiscount.value
     })
 
     // Auto-search functionality
@@ -541,7 +553,7 @@ export default {
       }
       
       // Check if item is available
-      if (item.status !== 'available') {
+      if (!['available', 'returned_resaleable'].includes(item.status)) {
         showCartMessage(`This item is ${item.status} and cannot be added to cart`)
         return
       }
@@ -836,27 +848,85 @@ export default {
 
     // Discount calculation functions
     const getHighestDiscount = (item) => {
-      if (!item || !item.discount_info) return null
+      if (!item) return null
       
-      // Parse the discount_info string (e.g., "Size: -25.00%")
-      const discountMatch = item.discount_info.match(/-?(\d+\.?\d*)%/)
-      if (discountMatch) {
-        return parseFloat(discountMatch[1])
+      // For items with discount_info (from API), extract the percentage
+      if (item.discount_info) {
+        const discountMatch = item.discount_info.match(/-?(\d+\.?\d*)%/)
+        if (discountMatch) {
+          return parseFloat(discountMatch[1])
+        }
+      }
+      
+      // For cart items without discount_info, calculate highest discount manually
+      if (item.dress) {
+        let highestDiscount = 0
+        
+        // Check collection discount
+        if (item.dress.collection?.discount_active && item.dress.collection?.discount_percentage > 0) {
+          highestDiscount = Math.max(highestDiscount, item.dress.collection.discount_percentage)
+        }
+        
+        // Check dress discount
+        if (item.dress.discount_active && item.dress.discount_percentage > 0) {
+          highestDiscount = Math.max(highestDiscount, item.dress.discount_percentage)
+        }
+        
+        // Check size discount (if available in cart item)
+        if (item.size_discount_active && item.size_discount_percentage > 0) {
+          highestDiscount = Math.max(highestDiscount, item.size_discount_percentage)
+        }
+        
+        return highestDiscount > 0 ? highestDiscount : null
       }
       
       return null
     }
     
     const getDiscountLevel = (item) => {
-      if (!item || !item.discount_info) return ''
+      if (!item) return ''
       
-      // Parse the discount_info string to get the level
-      if (item.discount_info.includes('Size:')) {
-        return 'Size'
-      } else if (item.discount_info.includes('Style:')) {
-        return 'Style'
-      } else if (item.discount_info.includes('Collection:')) {
-        return 'Collection'
+      // For items with discount_info (from API), extract the source
+      if (item.discount_info) {
+        if (item.discount_info.includes('Size:')) {
+          return 'Size'
+        } else if (item.discount_info.includes('Style:')) {
+          return 'Style'
+        } else if (item.discount_info.includes('Collection:')) {
+          return 'Collection'
+        }
+      }
+      
+      // For cart items without discount_info, determine highest discount source
+      if (item.dress) {
+        let highestDiscount = 0
+        let discountSource = ''
+        
+        // Check collection discount
+        if (item.dress.collection?.discount_active && item.dress.collection?.discount_percentage > 0) {
+          if (item.dress.collection.discount_percentage > highestDiscount) {
+            highestDiscount = item.dress.collection.discount_percentage
+            discountSource = 'Collection'
+          }
+        }
+        
+        // Check dress discount
+        if (item.dress.discount_active && item.dress.discount_percentage > 0) {
+          if (item.dress.discount_percentage > highestDiscount) {
+            highestDiscount = item.dress.discount_percentage
+            discountSource = 'Style'
+          }
+        }
+        
+        // Check size discount
+        if (item.size_discount_active && item.size_discount_percentage > 0) {
+          if (item.size_discount_percentage > highestDiscount) {
+            highestDiscount = item.size_discount_percentage
+            discountSource = 'Size'
+          }
+        }
+        
+        return discountSource
       }
       
       return ''
@@ -899,6 +969,7 @@ export default {
       cartMessageType,
       dressItems,
       collections,
+      originalPriceSum,
       subtotal,
       totalDiscount,
       tax,

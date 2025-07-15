@@ -50,33 +50,58 @@
           <div class="space-y-2">
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Dress:</span>
-              <span class="text-sm font-medium">{{ foundItem.dress?.name }}</span>
+              <span class="text-sm font-medium">{{ foundItem.dress_name }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Collection:</span>
-              <span class="text-sm font-medium">{{ foundItem.dress?.collection?.name }}</span>
+              <span class="text-sm font-medium">{{ foundItem.collection_name }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Size:</span>
-              <span class="text-sm font-medium">{{ foundItem.dress.size }}</span>
+              <span class="text-sm font-medium">{{ foundItem.size }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Barcode:</span>
               <span class="text-sm font-medium">{{ foundItem.barcode }}</span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-600">Sale Price:</span>
-              <span class="text-sm font-medium">PKR {{ foundItem.sale_price || foundItem.dress?.sale_price }}</span>
+            
+            <!-- Pricing Breakdown (like POS) -->
+            <div class="border-t pt-2 mt-2">
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Original Price:</span>
+                <span class="text-sm font-medium">Rs. {{ foundItem.original_price }}</span>
+              </div>
+              <div class="flex justify-between text-blue-600">
+                <span class="text-sm">GST ({{ foundItem.tax_percentage }}%):</span>
+                <span class="text-sm">Rs. {{ foundItem.tax_amount }}</span>
+              </div>
+              <div v-if="foundItem.total_discount_amount > 0" class="flex justify-between text-red-600">
+                <span class="text-sm">Discount:</span>
+                <span class="text-sm">-Rs. {{ foundItem.total_discount_amount }}</span>
+              </div>
+              <div class="flex justify-between font-bold text-green-600 border-t pt-1">
+                <span class="text-sm">Amount Paid:</span>
+                <span class="text-sm">Rs. {{ foundItem.item_total }}</span>
+              </div>
             </div>
+            
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Sale Date:</span>
               <span class="text-sm font-medium">{{ formatDate(foundItem.sale_date) }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Invoice:</span>
+              <span class="text-sm font-medium">{{ foundItem.invoice_number }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Status:</span>
               <span :class="foundItem.status === 'sold' ? 'text-green-600' : 'text-red-600'" class="text-sm font-medium">
                 {{ foundItem.status }}
               </span>
+            </div>
+            <div v-if="foundItem.days_remaining" class="flex justify-between">
+              <span class="text-sm text-gray-600">Return Period:</span>
+              <span class="text-sm font-medium text-orange-600">{{ foundItem.days_remaining }} days left</span>
             </div>
           </div>
         </div>
@@ -90,7 +115,7 @@
               <label class="inline-flex items-center">
                 <input
                   type="radio"
-                  value="refund"
+                  value="return"
                   v-model="returnType"
                   class="form-radio h-4 w-4 text-indigo-600"
                 />
@@ -173,7 +198,8 @@
                 <div>
                   <p class="text-sm font-medium">{{ exchangeItem.dress?.name }}</p>
                   <p class="text-xs text-gray-600">{{ exchangeItem.dress?.collection?.name }} - Size: {{ exchangeItem.dress?.size }}</p>
-                  <p class="text-xs text-green-600">PKR {{ exchangeItem.final_price || exchangeItem.dress?.sale_price }}</p>
+                  <p class="text-xs text-green-600">Rs. {{ exchangeItem.final_price_with_tax }}</p>
+                  <p v-if="exchangeItem.discount_info" class="text-xs text-orange-600">{{ exchangeItem.discount_info }}</p>
                 </div>
                 <button
                   @click="exchangeItem = null"
@@ -186,21 +212,21 @@
           </div>
           
           <!-- Refund Amount (if refund) -->
-          <div v-if="returnType === 'refund'" class="mb-4">
+          <div v-if="returnType === 'return'" class="mb-4">
             <label for="refund-amount" class="block text-sm font-medium text-gray-700 mb-2">Refund Amount</label>
             <div class="relative">
-              <span class="absolute left-3 top-2 text-gray-500">PKR</span>
+              <span class="absolute left-3 top-2 text-gray-500">Rs.</span>
               <input
                 type="number"
                 id="refund-amount"
                 v-model="refundAmount"
-                :max="foundItem.sale_price || foundItem.dress?.sale_price"
+                :max="foundItem.item_total"
                 class="block w-full pl-12 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 placeholder="0.00"
               />
             </div>
             <p class="text-xs text-gray-500 mt-1">
-              Maximum: PKR {{ foundItem.sale_price || foundItem.dress?.sale_price }}
+              Maximum: Rs. {{ foundItem.item_total }} (Amount Actually Paid)
             </p>
           </div>
           
@@ -368,7 +394,7 @@ const searchBarcode = ref('');
 const exchangeBarcode = ref('');
 const foundItem = ref(null);
 const exchangeItem = ref(null);
-const returnType = ref('refund');
+const returnType = ref('return');
 const reason = ref('');
 const notes = ref('');
 const refundAmount = ref(0);
@@ -383,8 +409,8 @@ const recentReturns = ref([]);
 const canSubmit = computed(() => {
   if (!foundItem.value || !reason.value) return false;
   
-  if (returnType.value === 'refund') {
-    return refundAmount.value > 0 && refundAmount.value <= (foundItem.value.sale_price || foundItem.value.dress?.sale_price);
+  if (returnType.value === 'return') {
+    return refundAmount.value > 0 && refundAmount.value <= foundItem.value.item_total;
   }
   
   if (returnType.value === 'exchange') {
@@ -402,25 +428,25 @@ const searchItem = async () => {
   clearError();
   
   try {
-    // First, try to find the item by barcode
-    const response = await window.axios.get(`/api/dress-items/barcode/${searchBarcode.value}`);
+    // Use the new returns API endpoint for sold items
+    const response = await window.axios.get(`/api/returns/search-sold-item/${searchBarcode.value}`);
     
     if (response.data) {
       foundItem.value = response.data;
       
-      // Set default refund amount to the sale price
-      if (foundItem.value.sale_price) {
-        refundAmount.value = foundItem.value.sale_price;
-      } else if (foundItem.value.dress?.sale_price) {
-        refundAmount.value = foundItem.value.dress.sale_price;
-      }
+      // Set default refund amount to the actual amount paid (item_total)
+      refundAmount.value = foundItem.value.item_total;
     } else {
-      setError('Item not found');
+      setError('Sold item not found');
       foundItem.value = null;
     }
   } catch (error) {
-    console.error('Error searching for item:', error);
-    setError('Item not found or error occurred during search');
+    console.error('Error searching for sold item:', error);
+    if (error.response?.data?.message) {
+      setError(error.response.data.message);
+    } else {
+      setError('Error occurred during search');
+    }
     foundItem.value = null;
   } finally {
     isSearching.value = false;
@@ -436,7 +462,7 @@ const searchExchangeItem = async () => {
   try {
     const response = await window.axios.get(`/api/dress-items/barcode/${exchangeBarcode.value}`);
     
-    if (response.data && response.data.status === 'available') {
+    if (response.data && (response.data.status === 'available' || response.data.status === 'returned_resaleable')) {
       exchangeItem.value = response.data;
       exchangeBarcode.value = '';
     } else if (response.data) {
@@ -446,7 +472,11 @@ const searchExchangeItem = async () => {
     }
   } catch (error) {
     console.error('Error searching for exchange item:', error);
-    setError('Exchange item not found');
+    if (error.response && error.response.status === 404) {
+      setError('Exchange item not found');
+    } else {
+      setError('Error searching for exchange item');
+    }
   }
 };
 
@@ -459,13 +489,14 @@ const processReturn = async () => {
   
   try {
     const returnData = {
-      dress_item_id: foundItem.value.id,
+      sale_item_id: foundItem.value.sale_item_id,
+      dress_item_id: foundItem.value.dress_item_id,
       return_type: returnType.value,
-      reason: reason.value,
+      return_reason: reason.value,
       notes: notes.value
     };
     
-    if (returnType.value === 'refund') {
+    if (returnType.value === 'return') {
       returnData.refund_amount = refundAmount.value;
     } else if (returnType.value === 'exchange') {
       returnData.exchange_item_id = exchangeItem.value.id;
@@ -514,10 +545,11 @@ const resetForm = () => {
   exchangeBarcode.value = '';
   foundItem.value = null;
   exchangeItem.value = null;
-  returnType.value = 'refund';
+  returnType.value = 'return';
   reason.value = '';
   notes.value = '';
   refundAmount.value = 0;
+  clearError();
 };
 
 // Load recent returns

@@ -413,9 +413,11 @@ export class ThermalInvoiceGenerator {
       const sku = item.dress?.sku || item.sku || 'N/A'
       // Prioritize barcode from sale_items table, then from dress_item
       const barcode = item.barcode || item.dress_item?.barcode || item.dress?.barcode || 'N/A'
-      const salePrice = parseFloat(item.dress?.sale_price || item.sale_price || 0).toFixed(2)
+      const salePrice = parseFloat(item.dress?.sale_price || item.sale_price || 0)
+      const taxPercentage = item.dress?.tax_percentage || 18
+      const gstAmount = (salePrice * taxPercentage / 100)
       const totalDiscount = parseFloat(item.total_discount || item.total_discount_amount || 0)
-      const finalPrice = parseFloat(item.final_price || item.item_total || item.dress?.sale_price || 0).toFixed(2)
+      const finalPrice = salePrice + gstAmount - totalDiscount
 
       itemsHTML += `
       <div class="item-row">
@@ -433,13 +435,53 @@ export class ThermalInvoiceGenerator {
         </div>
         <div class="price-row">
           <span>Price:</span>
-          <span>Rs. ${salePrice}</span>
+          <span>Rs. ${salePrice.toFixed(2)}</span>
+        </div>
+        <div class="price-row">
+          <span>GST (${taxPercentage}%):</span>
+          <span>Rs. ${gstAmount.toFixed(2)}</span>
         </div>`
 
       if (totalDiscount > 0) {
+        // Extract discount info from the item
+        let discountLabel = 'Discount:'
+        if (item.discount_info) {
+          // Use the discount_info from API (e.g., "Collection: -15%")
+          discountLabel = item.discount_info.replace('-', '').replace('%', '%:')
+        } else {
+          // Calculate highest discount manually for cart items
+          let highestDiscount = 0
+          let discountSource = ''
+          
+          if (item.dress?.collection?.discount_active && item.dress.collection?.discount_percentage > 0) {
+            if (item.dress.collection.discount_percentage > highestDiscount) {
+              highestDiscount = item.dress.collection.discount_percentage
+              discountSource = 'Collection'
+            }
+          }
+          
+          if (item.dress?.discount_active && item.dress?.discount_percentage > 0) {
+            if (item.dress.discount_percentage > highestDiscount) {
+              highestDiscount = item.dress.discount_percentage
+              discountSource = 'Style'
+            }
+          }
+          
+          if (item.size_discount_active && item.size_discount_percentage > 0) {
+            if (item.size_discount_percentage > highestDiscount) {
+              highestDiscount = item.size_discount_percentage
+              discountSource = 'Size'
+            }
+          }
+          
+          if (discountSource && highestDiscount > 0) {
+            discountLabel = `${discountSource} (${highestDiscount}%):`
+          }
+        }
+        
         itemsHTML += `
         <div class="price-row">
-          <span>Discount:</span>
+          <span>${discountLabel}</span>
           <span>-Rs. ${totalDiscount.toFixed(2)}</span>
         </div>`
       }
@@ -447,7 +489,7 @@ export class ThermalInvoiceGenerator {
       itemsHTML += `
         <div class="price-row">
           <span><strong>Total:</strong></span>
-          <span><strong>Rs. ${finalPrice}</strong></span>
+          <span><strong>Rs. ${finalPrice.toFixed(2)}</strong></span>
         </div>
       </div>`
     })
@@ -460,20 +502,10 @@ export class ThermalInvoiceGenerator {
    * Build totals section
    */
   buildTotalsSection(totals) {
-    const subtotal = parseFloat(totals?.subtotal || 0).toFixed(2)
-    const tax = parseFloat(totals?.tax || 0).toFixed(2)
     const total = parseFloat(totals?.total || 0).toFixed(2)
 
     return `
     <div class="total-section">
-      <div class="total-row">
-        <span>Subtotal:</span>
-        <span>Rs. ${subtotal}</span>
-      </div>
-      <div class="total-row">
-        <span>GST (18%):</span>
-        <span>Rs. ${tax}</span>
-      </div>
       <div class="total-row final-total">
         <span>GRAND TOTAL:</span>
         <span>Rs. ${total}</span>

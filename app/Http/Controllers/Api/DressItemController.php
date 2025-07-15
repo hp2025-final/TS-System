@@ -33,9 +33,9 @@ class DressItemController extends Controller
             });
         }
 
-        // Filter available items only
+        // Filter available items only (includes resaleable returns)
         if ($request->boolean('available_only')) {
-            $query->available();
+            $query->resaleable(); // Use new scope that includes both available and returned_resaleable
         }
 
         // Search by barcode
@@ -175,11 +175,19 @@ class DressItemController extends Controller
             $discountInfo = "{$discountSource}: -{$highestDiscount}%";
         }
 
+        // Calculate GST on original price (before discount)
+        $taxPercentage = $dress->tax_percentage ?? 18.00; // Default to 18% if not set
+        $taxAmount = round(($originalPrice * $taxPercentage / 100), 2);
+        $finalPriceWithTax = round($finalPrice + $taxAmount, 2);
+
         // Add computed fields to the response
         $dressItem->original_price = $originalPrice;
         $dressItem->final_price = round($finalPrice, 2);
         $dressItem->total_discount = round($originalPrice - $finalPrice, 2);
         $dressItem->discount_info = $discountInfo;
+        $dressItem->tax_percentage = $taxPercentage;
+        $dressItem->tax_amount = $taxAmount;
+        $dressItem->final_price_with_tax = $finalPriceWithTax;
         
         return response()->json($dressItem);
     }
@@ -247,7 +255,7 @@ class DressItemController extends Controller
         $search = $request->get('search');
         
         $query = DressItem::with(['dress.collection'])
-            ->where('status', 'available');
+            ->resaleable(); // Include both available and returned_resaleable items
             
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -262,5 +270,111 @@ class DressItemController extends Controller
         $items = $query->limit(20)->get();
         
         return response()->json(['data' => $items]);
+    }
+
+    /**
+     * Get resaleable returned items for inventory management
+     */
+    public function getResaleableItems(Request $request)
+    {
+        $search = $request->get('search');
+        
+        $query = DressItem::with(['dress.collection', 'returns' => function($q) {
+                $q->latest()->first();
+            }])
+            ->where('status', 'returned_resaleable');
+            
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('barcode', 'LIKE', "%{$search}%")
+                  ->orWhereHas('dress', function($subQ) use ($search) {
+                      $subQ->where('name', 'LIKE', "%{$search}%")
+                           ->orWhere('sku', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+        
+        $items = $query->orderBy('returned_at', 'desc')->paginate(20);
+        
+        return response()->json($items);
+    }
+
+    /**
+     * Make a resaleable item available for sale again
+     */
+    public function makeAvailable(Request $request, DressItem $dressItem)
+    {
+        if ($dressItem->status !== 'returned_resaleable') {
+            return response()->json([
+                'message' => 'Item must be in returned_resaleable status to make available'
+            ], 400);
+        }
+
+        $request->validate([
+            'quality_check_passed' => 'required|boolean',
+            'notes' => 'nullable|string|max:500'
+        ]);
+
+        if (!$request->quality_check_passed) {
+            return response()->json([
+                'message' => 'Quality check must pass before making item available'
+            ], 400);
+        }
+
+        $dressItem->update([
+            'status' => 'available',
+            'returned_at' => null,
+            'updated_at' => now()
+        ]);
+
+        // Log the action (you could create a separate audit log)
+        \Log::info('Item made available for resale', [
+            'dress_item_id' => $dressItem->id,
+            'barcode' => $dressItem->barcode,
+            'user_id' => auth()->id(),
+            'notes' => $request->notes
+        ]);
+
+        return response()->json([
+            'message' => 'Item successfully made available for sale',
+            'dress_item' => $dressItem->load(['dress.collection'])
+        ]);
+    }
+
+    /**
+     * Mark an item as damaged (quality control rejected)
+     */
+    public function markDamaged(Request $request, DressItem $dressItem)
+    {
+        if (!in_array($dressItem->status, ['returned_resaleable', 'available'])) {
+            return response()->json([
+                'message' => 'Item cannot be marked as damaged from current status'
+            ], 400);
+        }
+
+        $request->validate([
+            'damage_reason' => 'nullable|string|max:500'
+        ]);
+
+        $previousStatus = $dressItem->status;
+        
+        $dressItem->update([
+            'status' => 'damaged',
+            'updated_at' => now()
+        ]);
+
+        // Log the action
+        \Log::info('Item marked as damaged', [
+            'dress_item_id' => $dressItem->id,
+            'barcode' => $dressItem->barcode,
+            'previous_status' => $previousStatus,
+            'user_id' => auth()->id(),
+            'damage_reason' => $request->damage_reason
+        ]);
+
+        return response()->json([
+            'message' => 'Item successfully marked as damaged',
+            'dress_item' => $dressItem->load(['dress.collection'])
+        ]);
     }
 }

@@ -26,7 +26,9 @@ class SaleItem extends Model
         'tax_percentage',
         'tax_amount',
         'item_total',
-        'profit_amount'
+        'profit_amount',
+        'exchange_return_id',
+        'is_exchange_item'
     ];
 
     protected $casts = [
@@ -40,6 +42,7 @@ class SaleItem extends Model
         'tax_amount' => 'decimal:2',
         'item_total' => 'decimal:2',
         'profit_amount' => 'decimal:2',
+        'is_exchange_item' => 'boolean',
     ];
 
     public function sale(): BelongsTo
@@ -55,6 +58,11 @@ class SaleItem extends Model
     public function returns(): HasMany
     {
         return $this->hasMany(ReturnItem::class);
+    }
+
+    public function exchangeReturn(): BelongsTo
+    {
+        return $this->belongsTo(ReturnItem::class, 'exchange_return_id');
     }
 
     public function scopeBySize($query, $size)

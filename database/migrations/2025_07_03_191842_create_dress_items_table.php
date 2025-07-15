@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('barcode')->unique();
             $table->decimal('size_discount_percentage', 5, 2)->default(0);
             $table->boolean('size_discount_active')->default(false);
-            $table->enum('status', ['available', 'sold', 'returned', 'damaged'])->default('available');
+            $table->enum('status', ['available', 'sold', 'returned_defective', 'returned_resaleable', 'damaged'])->default('available');
             $table->timestamp('sold_at')->nullable();
             $table->timestamp('returned_at')->nullable();
             $table->timestamps();

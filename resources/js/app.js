@@ -12,7 +12,8 @@ import Collections from './components/collections/CollectionsPage.vue';
 import Dresses from './components/dresses/DressesPage.vue';
 import AdvancedPOS from './components/pos/AdvancedPOS.vue';
 import Reports from './components/reports/ReportsDashboard.vue';
-import Returns from './components/returns/ReturnsPage.vue';
+import Returns from './components/returns/ReturnsPageNew.vue';
+import ResaleableItems from './components/inventory/ResaleableItemsPage.vue';
 
 // Import stores
 import { useAuthStore } from './stores/auth';
@@ -59,6 +60,12 @@ const routes = [
         path: '/returns',
         name: 'returns',
         component: Returns,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/inventory',
+        name: 'inventory',
+        component: ResaleableItems,
         meta: { requiresAuth: true }
     }
 ];

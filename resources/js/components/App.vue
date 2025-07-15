@@ -142,6 +142,7 @@ const getIcon = (iconName) => {
     dresses: `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.433 2.433c-1.211.06-2.36-.94-2.36-2.164 0-1.223 1.043-2.223 2.36-2.223h1.088c.482 0 .964.07 1.423.209m6.19-1.5-1.088-1.088a1.5 1.5 0 010-2.121l1.088-1.088a1.5 1.5 0 012.121 0l1.088 1.088a1.5 1.5 0 010 2.121l-1.088 1.088a1.5 1.5 0 01-2.121 0z'/><path stroke-linecap='round' stroke-linejoin='round' d='M11.25 5.25v1.5m0 0v1.5m0-1.5h1.5m-1.5 0h-1.5'/></svg>`,
     reports: `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z'/></svg>`,
     returns: `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3'/></svg>`,
+    inventory: `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M6 20.25h12m-7.5-3v3m3-3v3m-10.5-3h15M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z'/></svg>`,
     logout: `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9'/></svg>`,
   };
   return icons[iconName] || '';
@@ -154,6 +155,7 @@ const navigationItems = [
   { name: 'dresses', path: '/dresses', label: 'Dresses', icon: 'dresses' },
   { name: 'reports', path: '/reports', label: 'Reports', icon: 'reports' },
   { name: 'returns', path: '/returns', label: 'Returns', icon: 'returns' },
+  { name: 'inventory', path: '/inventory', label: 'Inventory', icon: 'inventory' },
 ];
 
 const logout = async () => {

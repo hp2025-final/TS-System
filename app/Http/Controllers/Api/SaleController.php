@@ -48,7 +48,7 @@ class SaleController extends Controller
         $request->validate([
             'items' => 'required|array|min:1',
             'items.*.dress_item_id' => 'required|exists:dress_items,id',
-            'payment_method' => 'required|in:cash,bank_transfer',
+            'payment_method' => 'required|in:cash,bank_transfer,exchange',
             'customer_name' => 'nullable|string|max:255',
             'customer_phone' => 'nullable|string|max:20',
             'subtotal' => 'required|numeric|min:0',
@@ -69,8 +69,8 @@ class SaleController extends Controller
             foreach ($request->items as $item) {
                 $dressItem = DressItem::with(['dress.collection'])->findOrFail($item['dress_item_id']);
                 
-                // Check availability
-                if ($dressItem->status !== 'available') {
+                // Check availability (allow both available and returned_resaleable items)
+                if (!in_array($dressItem->status, ['available', 'returned_resaleable'])) {
                     return response()->json([
                         'message' => "Item {$dressItem->barcode} is not available"
                     ], 400);

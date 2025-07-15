@@ -50,6 +50,33 @@ class DressItem extends Model
         return $query->where('status', 'sold');
     }
 
+    public function scopeReturned($query)
+    {
+        return $query->whereIn('status', ['returned_defective', 'returned_resaleable']);
+    }
+
+    public function scopeResaleable($query)
+    {
+        return $query->whereIn('status', ['available', 'returned_resaleable']);
+    }
+
+    public function scopeDefective($query)
+    {
+        return $query->whereIn('status', ['returned_defective', 'damaged']);
+    }
+
+    // Check if item can be sold
+    public function isAvailableForSale()
+    {
+        return in_array($this->status, ['available', 'returned_resaleable']);
+    }
+
+    // Check if item is in good condition for resale
+    public function isResaleable()
+    {
+        return $this->status === 'returned_resaleable';
+    }
+
     public function scopeBySize($query, $size)
     {
         return $query->where('size', $size);
