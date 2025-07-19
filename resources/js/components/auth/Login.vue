@@ -76,20 +76,6 @@
             <span v-else>Sign In</span>
           </button>
         </form>
-
-        <!-- Demo Credentials -->
-        <div class="mt-6 p-4 bg-stone-50 rounded-xl border border-stone-200">
-          <div class="flex items-center mb-3">
-            <svg class="h-5 w-5 text-stone-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="text-sm font-medium text-stone-700">Demo Credentials</p>
-          </div>
-          <div class="text-xs text-stone-600 space-y-1">
-            <p><span class="font-semibold">Admin:</span> admin@tspos.com / password</p>
-            <p><span class="font-semibold">Staff:</span> staff@tspos.com / password</p>
-          </div>
-        </div>
       </div>
     </div>
   </div>

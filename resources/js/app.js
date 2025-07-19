@@ -12,6 +12,8 @@ import Collections from './components/collections/CollectionsPage.vue';
 import Dresses from './components/dresses/DressesPage.vue';
 import AdvancedPOS from './components/pos/AdvancedPOS.vue';
 import Reports from './components/reports/ReportsDashboard.vue';
+import SalesReport from './components/reports/SalesReport.vue';
+import ReturnsReport from './components/reports/ReturnsReport.vue';
 import Returns from './components/returns/ReturnsPageNew.vue';
 import ResaleableItems from './components/inventory/ResaleableItemsPage.vue';
 
@@ -54,6 +56,18 @@ const routes = [
         path: '/reports',
         name: 'reports',
         component: Reports,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/reports/sales',
+        name: 'sales-report',
+        component: SalesReport,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/reports/returns',
+        name: 'returns-report',
+        component: ReturnsReport,
         meta: { requiresAuth: true }
     },
     {

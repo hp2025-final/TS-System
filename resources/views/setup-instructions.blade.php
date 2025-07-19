@@ -143,23 +143,6 @@
             </div>
         </div>
 
-        <!-- Demo Credentials -->
-        <div class="bg-blue-50 rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-blue-900 mb-4">🔑 Demo Credentials</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-white rounded-lg p-4">
-                    <h3 class="font-medium text-blue-900">Admin User</h3>
-                    <p class="text-sm text-blue-700">admin@tspos.com</p>
-                    <p class="text-sm text-blue-700">password</p>
-                </div>
-                <div class="bg-white rounded-lg p-4">
-                    <h3 class="font-medium text-blue-900">Staff User</h3>
-                    <p class="text-sm text-blue-700">staff@tspos.com</p>
-                    <p class="text-sm text-blue-700">password</p>
-                </div>
-            </div>
-        </div>
-
         <!-- Footer -->
         <div class="text-center mt-8 pt-8 border-t border-gray-200">
             <p class="text-gray-500 text-sm">

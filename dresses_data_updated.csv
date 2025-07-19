@@ -1,0 +1,142 @@
+collection_name,name,sku,description,size,cost_price,sale_price,discount_percentage,discount_active,tax_percentage,status
+"FUSION WAVES","Nooraya S",FW25-0150-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Nooraya M",FW25-0150-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Nooraya L",FW25-0150-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Nooraya XL",FW25-0150-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Aleeza S",FW25-0160-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Aleeza M",FW25-0160-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Aleeza L",FW25-0160-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Aleeza XL",FW25-0160-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Sereneh S",FW25-0140-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Sereneh M",FW25-0140-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Sereneh L",FW25-0140-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Sereneh XL",FW25-0140-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Aabroo S",FW25-0130-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Aabroo M",FW25-0130-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Aabroo L",FW25-0130-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Aabroo XL",FW25-0130-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Elaya S",FW25-0120-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Elaya M",FW25-0120-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Elaya L",FW25-0120-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Elaya XL",FW25-0120-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Naaz S",FW25-0110-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Naaz M",FW25-0110-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Naaz L",FW25-0110-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Naaz XL",FW25-0110-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Inaaya S",FW25-0100-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Inaaya M",FW25-0100-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Inaaya L",FW25-0100-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Inaaya XL",FW25-0100-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Yalina S",FW25-090-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Yalina M",FW25-090-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Yalina L",FW25-090-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Yalina XL",FW25-090-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Zareen S",FW25-080-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Zareen M",FW25-080-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Zareen L",FW25-080-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Zareen XL",FW25-080-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Silaah S",FW25-070-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Silaah M",FW25-070-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Silaah L",FW25-070-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Silaah XL",FW25-070-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Linaah S",FW25-060-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Linaah M",FW25-060-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Linaah L",FW25-060-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Linaah XL",FW25-060-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Cyana S",FW25-050-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Cyana M",FW25-050-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Cyana L",FW25-050-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Cyana XL",FW25-050-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Meher S",FW25-040-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Meher M",FW25-040-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Meher L",FW25-040-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Meher XL",FW25-040-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Avelyn S",FW25-030-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Avelyn M",FW25-030-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Avelyn L",FW25-030-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Avelyn XL",FW25-030-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Zayrah S",FW25-02-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Zayrah M",FW25-02-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Zayrah L",FW25-02-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Zayrah XL",FW25-02-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+"FUSION WAVES","Nura S",FW25-01-S,"2-PIECE PRINT",S,6250,6250,0.00,false,0,active
+"FUSION WAVES","Nura M",FW25-01-M,"2-PIECE PRINT",M,6250,6250,0.00,false,0,active
+"FUSION WAVES","Nura L",FW25-01-L,"2-PIECE PRINT",L,6250,6250,0.00,false,0,active
+"FUSION WAVES","Nura XL",FW25-01-XL,"2-PIECE PRINT",XL,6250,6250,0.00,false,0,active
+Palette,"Sahara Gold S",TSP-25110-S,"2-PIECE SOLID",S,5250,5250,0.00,false,0,active
+Palette,"Sahara Gold M",TSP-25110-M,"2-PIECE SOLID",M,5250,5250,0.00,false,0,active
+Palette,"Sahara Gold L",TSP-25110-L,"2-PIECE SOLID",L,5250,5250,0.00,false,0,active
+Palette,"Sahara Gold XL",TSP-25110-XL,"2-PIECE SOLID",XL,5250,5250,0.00,false,0,active
+Palette,"Noir S",TSP-25210-S,"2-PIECE SOLID",S,5250,5250,0.00,false,0,active
+Palette,"Noir M",TSP-25210-M,"2-PIECE SOLID",M,5250,5250,0.00,false,0,active
+Palette,"Noir L",TSP-25210-L,"2-PIECE SOLID",L,5250,5250,0.00,false,0,active
+Palette,"Noir XL",TSP-25210-XL,"2-PIECE SOLID",XL,5250,5250,0.00,false,0,active
+Palette,"Midnight Haze S",TSP-25310-S,"2-PIECE SOLID",S,5250,5250,0.00,false,0,active
+Palette,"Midnight Haze M",TSP-25310-M,"2-PIECE SOLID",M,5250,5250,0.00,false,0,active
+Palette,"Midnight Haze L",TSP-25310-L,"2-PIECE SOLID",L,5250,5250,0.00,false,0,active
+Palette,"Midnight Haze XL",TSP-25310-XL,"2-PIECE SOLID",XL,5250,5250,0.00,false,0,active
+Palette,"Amethyst S",TSP-25410-S,"2-PIECE SOLID",S,5250,5250,0.00,false,0,active
+Palette,"Amethyst M",TSP-25410-M,"2-PIECE SOLID",M,5250,5250,0.00,false,0,active
+Palette,"Amethyst L",TSP-25410-L,"2-PIECE SOLID",L,5250,5250,0.00,false,0,active
+Palette,"Amethyst XL",TSP-25410-XL,"2-PIECE SOLID",XL,5250,5250,0.00,false,0,active
+Palette,"Olive Luxe S",TSP-25510-S,"2-PIECE SOLID",S,5250,5250,0.00,false,0,active
+Palette,"Olive Luxe M",TSP-25510-M,"2-PIECE SOLID",M,5250,5250,0.00,false,0,active
+Palette,"Olive Luxe L",TSP-25510-L,"2-PIECE SOLID",L,5250,5250,0.00,false,0,active
+Palette,"Olive Luxe XL",TSP-25510-XL,"2-PIECE SOLID",XL,5250,5250,0.00,false,0,active
+Palette,"Aqua Mist S",TSP-25610-S,"2-PIECE SOLID",S,5250,5250,0.00,false,0,active
+Palette,"Aqua Mist M",TSP-25610-M,"2-PIECE SOLID",M,5250,5250,0.00,false,0,active
+Palette,"Aqua Mist L",TSP-25610-L,"2-PIECE SOLID",L,5250,5250,0.00,false,0,active
+Palette,"Aqua Mist XL",TSP-25610-XL,"2-PIECE SOLID",XL,5250,5250,0.00,false,0,active
+Palette,"Mahogany S",TSP-25710-S,"2-PIECE SOLID",S,5250,5250,0.00,false,0,active
+Palette,"Mahogany M",TSP-25710-M,"2-PIECE SOLID",M,5250,5250,0.00,false,0,active
+Palette,"Mahogany L",TSP-25710-L,"2-PIECE SOLID",L,5250,5250,0.00,false,0,active
+Palette,"Mahogany XL",TSP-25710-XL,"2-PIECE SOLID",XL,5250,5250,0.00,false,0,active
+Zar,"Zafira S",TSZL-25711-S,"2-PIECE Jaquard",S,6950,6950,0.00,false,0,active
+Zar,"Zafira M",TSZL-25711-M,"2-PIECE Jaquard",M,6950,6950,0.00,false,0,active
+Zar,"Zafira L",TSZL-25711-L,"2-PIECE Jaquard",L,6950,6950,0.00,false,0,active
+Zar,"Zafira XL",TSZL-25711-XL,"2-PIECE Jaquard",XL,6950,6950,0.00,false,0,active
+Zar,"Rameen S",TSZL-25712-S,"2-PIECE Jaquard",S,6950,6950,0.00,false,0,active
+Zar,"Rameen M",TSZL-25712-M,"2-PIECE Jaquard",M,6950,6950,0.00,false,0,active
+Zar,"Rameen L",TSZL-25712-L,"2-PIECE Jaquard",L,6950,6950,0.00,false,0,active
+Zar,"Rameen XL",TSZL-25712-XL,"2-PIECE Jaquard",XL,6950,6950,0.00,false,0,active
+"ESSENTIAL LUXE","Off White L",TSE-25910-L,Trouser,L,2450,2450,0.00,false,0,active
+ESSENTIAL,"White S",TSE-25810-S,Trouser,S,1590,1590,0.00,false,0,active
+Shireen,"Magenta  S",TSML-250701-S,"MONAR LUXE",S,13450,13450,0.00,false,0,active
+Shireen,"Magenta  M",TSML-250701-M,"MONAR LUXE",M,13450,13450,0.00,false,0,active
+Shireen,"Magenta  L",TSML-250701-L,"MONAR LUXE",L,13450,13450,0.00,false,0,active
+Shireen,"Magenta  XL",TSML-250701-XL,"MONAR LUXE",XL,13450,13450,0.00,false,0,active
+Shireen,"Ruby Red S",TSML-250702-S,"MONAR LUXE",S,13450,13450,0.00,false,0,active
+Shireen,"Ruby Red M",TSML-250702-M,"MONAR LUXE",M,13450,13450,0.00,false,0,active
+Shireen,"Ruby Red L",TSML-250702-L,"MONAR LUXE",L,13450,13450,0.00,false,0,active
+Shireen,"Ruby Red XL",TSML-250702-XL,"MONAR LUXE",XL,13450,13450,0.00,false,0,active
+Zumra,"Merve  S",FCZ-08-S,"ZUMRA LUXE",S,22999,22999,0.00,false,0,active
+Zumra,"Merve  M",FCZ-08-M,"ZUMRA LUXE",M,22999,22999,0.00,false,0,active
+Zumra,"Merve  L",FCZ-08-L,"ZUMRA LUXE",L,22999,22999,0.00,false,0,active
+Zumra,"Merve  XL",FCZ-08-XL,"ZUMRA LUXE",XL,22999,22999,0.00,false,0,active
+Shireen,"Zest Green S",TSML-250703-S,"MONAR LUXE",S,13450,13450,0.00,false,0,active
+Shireen,"Zest Green M",TSML-250703-M,"MONAR LUXE",M,13450,13450,0.00,false,0,active
+Shireen,"Zest Green L",TSML-250703-L,"MONAR LUXE",L,13450,13450,0.00,false,0,active
+Shireen,"Zest Green XL",TSML-250703-XL,"MONAR LUXE",XL,13450,13450,0.00,false,0,active
+Shireen,"Velvet Plum S",TSML-250704-S,"MONAR LUXE",S,13450,13450,0.00,false,0,active
+Shireen,"Velvet Plum M",TSML-250704-M,"MONAR LUXE",M,13450,13450,0.00,false,0,active
+Shireen,"Velvet Plum L",TSML-250704-L,"MONAR LUXE",L,13450,13450,0.00,false,0,active
+Shireen,"Velvet Plum XL",TSML-250704-XL,"MONAR LUXE",XL,13450,13450,0.00,false,0,active
+Shireen,"Oceanic Jade S",TSML-250705-S,"MONAR LUXE",S,13450,13450,0.00,false,0,active
+Shireen,"Oceanic Jade M",TSML-250705-M,"MONAR LUXE",M,13450,13450,0.00,false,0,active
+Shireen,"Oceanic Jade L",TSML-250705-L,"MONAR LUXE",L,13450,13450,0.00,false,0,active
+Shireen,"Oceanic Jade XL",TSML-250705-XL,"MONAR LUXE",XL,13450,13450,0.00,false,0,active
+Shireen,"Aqua Bloom S",TSML-250706-S,"MONAR LUXE",S,13450,13450,0.00,false,0,active
+Shireen,"Aqua Bloom M",TSML-250706-M,"MONAR LUXE",M,13450,13450,0.00,false,0,active
+Shireen,"Aqua Bloom L",TSML-250706-L,"MONAR LUXE",L,13450,13450,0.00,false,0,active
+Shireen,"Aqua Bloom XL",TSML-250706-XL,"MONAR LUXE",XL,13450,13450,0.00,false,0,active
+Shireen,"Midnight  S",TSML-250707-S,"MONAR LUXE",S,13450,13450,0.00,false,0,active
+Shireen,"Midnight  M",TSML-250707-M,"MONAR LUXE",M,13450,13450,0.00,false,0,active
+Shireen,"Midnight  L",TSML-250707-L,"MONAR LUXE",L,13450,13450,0.00,false,0,active
+"FUSION WAVES (W)","Linaah (Frock) S",FW25-0601-S,"1 PCS FROCK",S,5990,5990,0.00,false,0,active
+"FUSION WAVES (W)","Linaah (Frock) M",FW25-0601-M,"1 PCS FROCK",M,5990,5990,0.00,false,0,active
+"FUSION WAVES (W)","Linaah (Frock) L",FW25-0601-L,"1 PCS FROCK",L,5990,5990,0.00,false,0,active
+"FUSION WAVES (W)","Linaah (Frock) XL",FW25-0601-XL,"1 PCS FROCK",XL,5990,5990,0.00,false,0,active
+"FUSION WAVES (W)","Inaaya (Western) S",FW25-01001-S,"2 PCS WESTERN",S,7550,7550,0.00,false,0,active
+"FUSION WAVES (W)","Inaaya (Western) M",FW25-01001-M,"2 PCS WESTERN",M,7550,7550,0.00,false,0,active
+"FUSION WAVES (W)","Inaaya (Western) L",FW25-01001-L,"2 PCS WESTERN",L,7550,7550,0.00,false,0,active
+"FUSION WAVES (W)","Inaaya (Western) XL",FW25-01001-XL,"2 PCS WESTERN",XL,7550,7550,0.00,false,0,active

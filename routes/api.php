@@ -190,11 +190,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/returns/stats', [App\Http\Controllers\Api\ModernReturnController::class, 'stats']);
     Route::post('/returns', [App\Http\Controllers\Api\ModernReturnController::class, 'store']);
 
-    // Reports (will add later)
-    // Route::get('/reports/daily-sales', [ReportController::class, 'dailySales']);
-    // Route::get('/reports/profit', [ReportController::class, 'profit']);
-    // Route::get('/reports/inventory', [ReportController::class, 'inventory']);
-    // Route::get('/reports/low-stock', [ReportController::class, 'lowStock']);
+    // Reports
+    Route::prefix('reports')->group(function () {
+        Route::get('/sales', [App\Http\Controllers\Api\SalesReportController::class, 'index']);
+        Route::get('/sales/export', [App\Http\Controllers\Api\SalesReportController::class, 'exportSales']);
+        Route::get('/returns', [App\Http\Controllers\Api\ReturnsReportController::class, 'index']);
+        Route::get('/returns/export', [App\Http\Controllers\Api\ReturnsReportController::class, 'exportReturns']);
+    });
 
     // Discount Management
     Route::get('/discounts/active', [DressItemController::class, 'getActiveDiscounts']);
