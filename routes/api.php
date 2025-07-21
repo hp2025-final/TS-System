@@ -196,6 +196,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/sales/export', [App\Http\Controllers\Api\SalesReportController::class, 'exportSales']);
         Route::get('/returns', [App\Http\Controllers\Api\ReturnsReportController::class, 'index']);
         Route::get('/returns/export', [App\Http\Controllers\Api\ReturnsReportController::class, 'exportReturns']);
+        Route::get('/barcode-sales', [App\Http\Controllers\Api\BarcodeSalesReportController::class, 'index']);
+        Route::get('/barcode-sales/export', [App\Http\Controllers\Api\BarcodeSalesReportController::class, 'export']);
+        Route::get('/barcode-returns', [App\Http\Controllers\Api\BarcodeReturnsReportController::class, 'index']);
+        Route::get('/barcode-returns/export', [App\Http\Controllers\Api\BarcodeReturnsReportController::class, 'export']);
     });
 
     // Discount Management

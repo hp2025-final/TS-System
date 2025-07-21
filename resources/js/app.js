@@ -11,9 +11,8 @@ import Dashboard from './components/DashboardEnhanced.vue';
 import Collections from './components/collections/CollectionsPage.vue';
 import Dresses from './components/dresses/DressesPage.vue';
 import AdvancedPOS from './components/pos/AdvancedPOS.vue';
-import Reports from './components/reports/ReportsDashboard.vue';
-import SalesReport from './components/reports/SalesReport.vue';
-import ReturnsReport from './components/reports/ReturnsReport.vue';
+import BarcodeSalesReport from './components/BarcodeSalesReport.vue';
+import BarcodeReturnsReport from './components/BarcodeReturnsReport.vue';
 import Returns from './components/returns/ReturnsPageNew.vue';
 import ResaleableItems from './components/inventory/ResaleableItemsPage.vue';
 
@@ -53,21 +52,15 @@ const routes = [
         meta: { requiresAuth: false } // Allow access without auth for testing
     },
     {
-        path: '/reports',
-        name: 'reports',
-        component: Reports,
+        path: '/reports/barcode-sales',
+        name: 'barcode-sales-report',
+        component: BarcodeSalesReport,
         meta: { requiresAuth: true }
     },
     {
-        path: '/reports/sales',
-        name: 'sales-report',
-        component: SalesReport,
-        meta: { requiresAuth: true }
-    },
-    {
-        path: '/reports/returns',
-        name: 'returns-report',
-        component: ReturnsReport,
+        path: '/reports/barcode-returns',
+        name: 'barcode-returns-report',
+        component: BarcodeReturnsReport,
         meta: { requiresAuth: true }
     },
     {

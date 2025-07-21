@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Barcode Sales Report API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffe6e6; border: 1px solid #ffb3b3; }
+        .success { background: #e6ffe6; border: 1px solid #b3ffb3; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Barcode Sales Report API</h1>
+    
+    <button onclick="testBarcodeSalesAPI()">Test API</button>
+    <button onclick="testWithFilters()">Test with Filters</button>
+    
+    <div id="results"></div>
+
+    <script>
+        async function testBarcodeSalesAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Testing Barcode Sales Report API...</p>';
+            
+            try {
+                const response = await fetch('/api/reports/barcode-sales?per_page=5');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    resultsDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ API Test Successful!</h3>
+                            <p><strong>Total Items:</strong> ${data.data.summary?.total_items || 0}</p>
+                            <p><strong>Total Sales Amount:</strong> Rs. ${parseFloat(data.data.summary?.total_sales_amount || 0).toLocaleString()}</p>
+                            <p><strong>Total Discount:</strong> Rs. ${parseFloat(data.data.summary?.total_discount_amount || 0).toLocaleString()}</p>
+                            <p><strong>Total Tax:</strong> Rs. ${parseFloat(data.data.summary?.total_tax_amount || 0).toLocaleString()}</p>
+                        </div>
+                        
+                        <h3>📋 Sample Sales Data (First 5 records):</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Barcode</th>
+                                    <th>Product</th>
+                                    <th>Collection</th>
+                                    <th>Size</th>
+                                    <th>Customer</th>
+                                    <th>Phone</th>
+                                    <th>Sale Price</th>
+                                    <th>Total</th>
+                                    <th>Invoice</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.data.sales.data.map(sale => `
+                                    <tr>
+                                        <td>${new Date(sale.sale_date).toLocaleDateString()}</td>
+                                        <td>${sale.barcode || 'N/A'}</td>
+                                        <td>${sale.dress_name}</td>
+                                        <td>${sale.collection_name}</td>
+                                        <td>${sale.size}</td>
+                                        <td>${sale.customer_name || '-'}</td>
+                                        <td>${sale.customer_phone || '-'}</td>
+                                        <td>Rs. ${parseFloat(sale.sale_price).toFixed(2)}</td>
+                                        <td>Rs. ${parseFloat(sale.item_total).toFixed(2)}</td>
+                                        <td>${sale.invoice_number}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        
+                        <h3>🔧 Available Filter Options:</h3>
+                        <p><strong>Collections:</strong> ${data.data.filters.collections.join(', ')}</p>
+                        <p><strong>Payment Methods:</strong> ${data.data.filters.payment_methods.join(', ')}</p>
+                    `;
+                } else {
+                    throw new Error(data.message || 'Unknown error');
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ API Test Failed!</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Details:</strong> ${error.stack || 'No additional details'}</p>
+                    </div>
+                `;
+                console.error('Error:', error);
+            }
+        }
+
+        async function testWithFilters() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Testing with filters...</p>';
+            
+            try {
+                // Test with search filter
+                const response = await fetch('/api/reports/barcode-sales?search=2503&per_page=3');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    resultsDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Filter Test Successful!</h3>
+                            <p><strong>Search Query:</strong> "2503"</p>
+                            <p><strong>Results Found:</strong> ${data.data.sales.total} items</p>
+                            <p><strong>Current Page:</strong> ${data.data.sales.current_page}/${data.data.sales.last_page}</p>
+                        </div>
+                        
+                        <h3>🔍 Filtered Results:</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Barcode</th>
+                                    <th>Product</th>
+                                    <th>Collection</th>
+                                    <th>Sale Price</th>
+                                    <th>Invoice</th>
+                                    <th>Cashier</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.data.sales.data.map(sale => `
+                                    <tr>
+                                        <td>${sale.barcode || 'N/A'}</td>
+                                        <td>${sale.dress_name}</td>
+                                        <td>${sale.collection_name}</td>
+                                        <td>Rs. ${parseFloat(sale.sale_price).toFixed(2)}</td>
+                                        <td>${sale.invoice_number}</td>
+                                        <td>${sale.cashier_name}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    throw new Error(data.message || 'Unknown error');
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Filter Test Failed!</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            testBarcodeSalesAPI();
+        };
+    </script>
+</body>
+</html>

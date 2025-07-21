@@ -153,9 +153,8 @@ const navigationItems = [
   { name: 'pos', path: '/pos', label: 'Advanced POS', icon: 'pos' },
   { name: 'collections', path: '/collections', label: 'Collections', icon: 'collections' },
   { name: 'dresses', path: '/dresses', label: 'Dresses', icon: 'dresses' },
-  { name: 'reports', path: '/reports', label: 'Reports', icon: 'reports' },
-  { name: 'sales-report', path: '/reports/sales', label: 'Sales Report', icon: 'reports' },
-  { name: 'returns-report', path: '/reports/returns', label: 'Returns Report', icon: 'returns' },
+  { name: 'barcode-sales-report', path: '/reports/barcode-sales', label: 'Barcode Sales Report', icon: 'reports' },
+  { name: 'barcode-returns-report', path: '/reports/barcode-returns', label: 'Barcode Returns Report', icon: 'returns' },
   { name: 'returns', path: '/returns', label: 'Returns', icon: 'returns' },
   { name: 'inventory', path: '/inventory', label: 'Inventory', icon: 'inventory' },
 ];
