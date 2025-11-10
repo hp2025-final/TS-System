@@ -15,6 +15,9 @@ import BarcodeSalesReport from './components/BarcodeSalesReport.vue';
 import BarcodeReturnsReport from './components/BarcodeReturnsReport.vue';
 import Returns from './components/returns/ReturnsPageNew.vue';
 import ResaleableItems from './components/inventory/ResaleableItemsPage.vue';
+import BulkUpload from './components/BulkUpload.vue';
+import BulkRetrieve from './components/BulkRetrieve.vue';
+import BarcodeList from './components/BarcodeList.vue';
 
 // Import stores
 import { useAuthStore } from './stores/auth';
@@ -74,6 +77,24 @@ const routes = [
         name: 'inventory',
         component: ResaleableItems,
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/bulk-upload',
+        name: 'bulk-upload',
+        component: BulkUpload,
+        meta: { requiresAuth: true, adminOnly: true }
+    },
+    {
+        path: '/bulk-retrieve',
+        name: 'bulk-retrieve',
+        component: BulkRetrieve,
+        meta: { requiresAuth: true, adminOnly: true }
+    },
+    {
+        path: '/barcode-list',
+        name: 'barcode-list',
+        component: BarcodeList,
+        meta: { requiresAuth: true }
     }
 ];
 
@@ -83,12 +104,20 @@ const router = createRouter({
 });
 
 // Navigation guards
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
+    
+    // Ensure auth state is loaded
+    if (!authStore.user && authStore.isAuthenticated) {
+        await authStore.checkAuth();
+    }
     
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
         next('/login');
     } else if (to.meta.guest && authStore.isAuthenticated) {
+        next('/');
+    } else if (to.meta.adminOnly && authStore.user?.email !== 'admin@tspos.com') {
+        // Redirect non-admin users to dashboard
         next('/');
     } else {
         next();

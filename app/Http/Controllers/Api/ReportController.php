@@ -16,6 +16,61 @@ use Carbon\Carbon;
 class ReportController extends Controller
 {
     /**
+     * Daily dashboard report
+     */
+    public function dailyReport(Request $request)
+    {
+        $today = now()->startOfDay();
+        
+        // Today's sales data
+        $todaySales = Sale::whereDate('sale_date', $today)->get();
+        $todayItems = SaleItem::whereHas('sale', function($query) use ($today) {
+            $query->whereDate('sale_date', $today);
+        })->count();
+        
+        $todayTransactions = $todaySales->count();
+        
+        // Available items count
+        $availableItems = DressItem::whereIn('status', ['available', 'returned_resaleable'])->count();
+        
+        // Low stock count (dresses with 5 or fewer available items)
+        $lowStockCount = Dress::with('dressItems')
+            ->get()
+            ->filter(function ($dress) {
+                return $dress->dressItems->whereIn('status', ['available', 'returned_resaleable'])->count() <= 5 
+                    && $dress->dressItems->whereIn('status', ['available', 'returned_resaleable'])->count() > 0;
+            })
+            ->count();
+        
+        // Recent sales (last 10)
+        $recentSales = Sale::with(['saleItems'])
+            ->whereDate('sale_date', $today)
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(function ($sale) {
+                return [
+                    'id' => $sale->id,
+                    'invoice_number' => $sale->invoice_number,
+                    'customer_name' => $sale->customer_name,
+                    'total_amount' => number_format($sale->total_amount, 2, '.', ''),
+                    'payment_method' => $sale->payment_method,
+                    'items_count' => $sale->saleItems->count(),
+                    'created_at' => $sale->created_at->toISOString(),
+                ];
+            });
+        
+        return response()->json([
+            'today_sales' => $todaySales->sum('total_amount'),
+            'today_items' => $todayItems,
+            'today_transactions' => $todayTransactions,
+            'available_items' => $availableItems,
+            'low_stock_count' => $lowStockCount,
+            'recent_sales' => $recentSales,
+        ]);
+    }
+
+    /**
      * Sales summary report
      */
     public function salesSummary(Request $request)
@@ -59,59 +114,40 @@ class ReportController extends Controller
     {
         $collections = Collection::with(['dresses.dressItems'])->get();
         
-        $inventory = [];
+        $byCollection = [];
         
         foreach ($collections as $collection) {
-            $collectionData = [
-                'collection_name' => $collection->name,
-                'total_items' => 0,
-                'available_items' => 0,
-                'sold_items' => 0,
-                'reserved_items' => 0,
-                'total_value' => 0,
-                'dresses' => []
-            ];
+            $totalItems = 0;
+            $availableItems = 0;
+            $soldItems = 0;
 
             foreach ($collection->dresses as $dress) {
                 $dressItems = $dress->dressItems;
-                $available = $dressItems->where('status', 'available');
+                $available = $dressItems->whereIn('status', ['available', 'returned_resaleable']);
                 $sold = $dressItems->where('status', 'sold');
-                $reserved = $dressItems->where('status', 'reserved');
 
-                $dressData = [
-                    'dress_name' => $dress->name,
-                    'total_items' => $dressItems->count(),
-                    'available_items' => $available->count(),
-                    'sold_items' => $sold->count(),
-                    'reserved_items' => $reserved->count(),
-                    'total_value' => $available->sum('dress.sale_price'),
-                    'sizes' => $dressItems->groupBy('size')->map(function ($sizeGroup) {
-                        return [
-                            'total' => $sizeGroup->count(),
-                            'available' => $sizeGroup->where('status', 'available')->count(),
-                            'sold' => $sizeGroup->where('status', 'sold')->count()
-                        ];
-                    })
-                ];
-
-                $collectionData['total_items'] += $dressData['total_items'];
-                $collectionData['available_items'] += $dressData['available_items'];
-                $collectionData['sold_items'] += $dressData['sold_items'];
-                $collectionData['reserved_items'] += $dressData['reserved_items'];
-                $collectionData['total_value'] += $dressData['total_value'];
-                $collectionData['dresses'][] = $dressData;
+                $totalItems += $dressItems->count();
+                $availableItems += $available->count();
+                $soldItems += $sold->count();
             }
 
-            $inventory[] = $collectionData;
+            $byCollection[] = [
+                'id' => $collection->id,
+                'name' => $collection->name,
+                'total_items' => $totalItems,
+                'available_items' => $availableItems,
+                'sold_items' => $soldItems,
+                'discount_percentage' => $collection->discount_percentage,
+                'discount_active' => $collection->discount_active,
+            ];
         }
 
         return response()->json([
-            'collections' => $inventory,
+            'by_collection' => $byCollection,
             'summary' => [
-                'total_items' => collect($inventory)->sum('total_items'),
-                'available_items' => collect($inventory)->sum('available_items'),
-                'sold_items' => collect($inventory)->sum('sold_items'),
-                'total_inventory_value' => collect($inventory)->sum('total_value')
+                'total_items' => collect($byCollection)->sum('total_items'),
+                'available_items' => collect($byCollection)->sum('available_items'),
+                'sold_items' => collect($byCollection)->sum('sold_items'),
             ]
         ]);
     }

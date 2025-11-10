@@ -155,4 +155,92 @@ class DressController extends Controller
             'dress' => $dress
         ]);
     }
+
+    /**
+     * Export dresses to Excel (CSV)
+     */
+    public function export(Request $request)
+    {
+        $query = Dress::with(['collection', 'dressItems']);
+
+        // Filter by collection
+        if ($request->has('collection_id')) {
+            $query->where('collection_id', $request->collection_id);
+        }
+
+        // Filter by status
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Search by name or SKU
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%");
+            });
+        }
+
+        $dresses = $query->get();
+
+        // Create CSV content
+        $headers = [
+            'Collection',
+            'Dress Name',
+            'SKU',
+            'Size',
+            'Cost Price',
+            'Sale Price',
+            'Discount %',
+            'Discount Active',
+            'Tax %',
+            'Status',
+            'Total Items',
+            'Available Items',
+            'Sold Items',
+            'Created At',
+        ];
+
+        $csvContent = implode(',', $headers) . "\n";
+
+        foreach ($dresses as $dress) {
+            $totalItems = $dress->dressItems->count();
+            $availableItems = $dress->dressItems->whereIn('status', ['available', 'returned_resaleable'])->count();
+            $soldItems = $dress->dressItems->where('status', 'sold')->count();
+
+            $row = [
+                $dress->collection->name,
+                $dress->name,
+                $dress->sku,
+                $dress->size,
+                $dress->cost_price,
+                $dress->sale_price,
+                $dress->discount_percentage,
+                $dress->discount_active ? 'Yes' : 'No',
+                $dress->tax_percentage,
+                $dress->status,
+                $totalItems,
+                $availableItems,
+                $soldItems,
+                $dress->created_at->format('d-m-Y'),
+            ];
+
+            // Escape commas and quotes in data
+            $row = array_map(function($field) {
+                if (strpos($field, ',') !== false || strpos($field, '"') !== false) {
+                    return '"' . str_replace('"', '""', $field) . '"';
+                }
+                return $field;
+            }, $row);
+
+            $csvContent .= implode(',', $row) . "\n";
+        }
+
+        $filename = 'dresses_' . date('Y-m-d_His') . '.csv';
+
+        return response($csvContent, 200)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
 }

@@ -7,6 +7,12 @@
           <div>
             <h1 class="text-2xl font-bold text-gray-900">Collections</h1>
           </div>
+          <button
+            @click="exportToExcel"
+            class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700"
+          >
+            Export to Excel
+          </button>
         </div>
       </div>
     </div>
@@ -497,6 +503,10 @@ const deleteCollection = async (collection) => {
       alert('Error deleting collection. Please try again.');
     }
   }
+};
+
+const exportToExcel = () => {
+  window.open('/api/collections-export', '_blank');
 };
 
 onMounted(async () => {

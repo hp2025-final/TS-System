@@ -165,4 +165,97 @@ class CollectionController extends Controller
             'collection' => $collection
         ]);
     }
+
+    /**
+     * Export collections to Excel (CSV)
+     */
+    public function export(Request $request)
+    {
+        $query = Collection::query();
+
+        // Filter by status
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Get collections with detailed size breakdown
+        $collections = $query->with(['dresses.dressItems' => function ($query) {
+            $query->where('status', 'available');
+        }])->get();
+
+        // Create CSV content
+        $headers = [
+            'Collection Name',
+            'Description',
+            'Discount %',
+            'Discount Active',
+            'Status',
+            'Total Dresses',
+            'Total Items',
+            'XS',
+            'S',
+            'M',
+            'L',
+            'XL',
+            'Unstitched',
+            'Created At',
+        ];
+
+        $csvContent = implode(',', $headers) . "\n";
+
+        foreach ($collections as $collection) {
+            $totalDresses = $collection->dresses->count();
+            $totalItems = 0;
+            $sizeBreakdown = [
+                'XS' => 0,
+                'S' => 0,
+                'M' => 0,
+                'L' => 0,
+                'XL' => 0,
+                'unstitched' => 0,
+            ];
+
+            foreach ($collection->dresses as $dress) {
+                $availableItems = $dress->dressItems->count();
+                $totalItems += $availableItems;
+                
+                if ($availableItems > 0 && isset($sizeBreakdown[$dress->size])) {
+                    $sizeBreakdown[$dress->size] += $availableItems;
+                }
+            }
+
+            $row = [
+                $collection->name,
+                $collection->description ?? '',
+                $collection->discount_percentage,
+                $collection->discount_active ? 'Yes' : 'No',
+                $collection->status,
+                $totalDresses,
+                $totalItems,
+                $sizeBreakdown['XS'],
+                $sizeBreakdown['S'],
+                $sizeBreakdown['M'],
+                $sizeBreakdown['L'],
+                $sizeBreakdown['XL'],
+                $sizeBreakdown['unstitched'],
+                $collection->created_at->format('d-m-Y'),
+            ];
+
+            // Escape commas and quotes in data
+            $row = array_map(function($field) {
+                if (strpos($field, ',') !== false || strpos($field, '"') !== false) {
+                    return '"' . str_replace('"', '""', $field) . '"';
+                }
+                return $field;
+            }, $row);
+
+            $csvContent .= implode(',', $row) . "\n";
+        }
+
+        $filename = 'collections_' . date('Y-m-d_His') . '.csv';
+
+        return response($csvContent, 200)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
 }

@@ -36,7 +36,6 @@
                 'flex items-center px-4 py-3 rounded-lg transition-all duration-150 text-base touch-manipulation min-h-[48px]',
               ]"
             >
-              <span class="mr-3 h-6 w-6 flex-shrink-0" v-html="getIcon(item.icon)"></span>
               <span class="truncate">{{ item.label }}</span>
             </router-link>
           </nav>
@@ -54,7 +53,6 @@
               @click="logout"
               class="mt-4 w-full flex items-center justify-center px-4 py-3 text-base font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 active:bg-stone-200 rounded-lg transition-all duration-150 touch-manipulation min-h-[48px]"
             >
-              <span class="mr-2 h-5 w-5" v-html="getIcon('logout')"></span>
               Logout
             </button>
           </div>
@@ -81,7 +79,6 @@
               'flex items-center px-4 py-3 rounded-lg transition-all duration-150 text-base',
             ]"
           >
-            <span class="mr-3 h-6 w-6 flex-shrink-0" v-html="getIcon(item.icon)"></span>
             <span class="truncate">{{ item.label }}</span>
           </router-link>
         </nav>
@@ -99,7 +96,6 @@
             @click="logout"
             class="mt-4 w-full flex items-center justify-center px-4 py-2 text-base font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-all duration-150"
           >
-            <span class="mr-2 h-5 w-5" v-html="getIcon('logout')"></span>
             Logout
           </button>
         </div>
@@ -126,7 +122,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 
@@ -148,16 +144,33 @@ const getIcon = (iconName) => {
   return icons[iconName] || '';
 };
 
-const navigationItems = [
+const baseNavigationItems = [
   { name: 'dashboard', path: '/', label: 'Dashboard', icon: 'dashboard' },
   { name: 'pos', path: '/pos', label: 'Advanced POS', icon: 'pos' },
   { name: 'collections', path: '/collections', label: 'Collections', icon: 'collections' },
   { name: 'dresses', path: '/dresses', label: 'Dresses', icon: 'dresses' },
+  { name: 'barcode-list', path: '/barcode-list', label: 'Barcode List', icon: 'inventory' },
   { name: 'barcode-sales-report', path: '/reports/barcode-sales', label: 'Barcode Sales Report', icon: 'reports' },
   { name: 'barcode-returns-report', path: '/reports/barcode-returns', label: 'Barcode Returns Report', icon: 'returns' },
   { name: 'returns', path: '/returns', label: 'Returns', icon: 'returns' },
   { name: 'inventory', path: '/inventory', label: 'Inventory', icon: 'inventory' },
 ];
+
+const adminNavigationItems = [
+  { name: 'bulk-upload', path: '/bulk-upload', label: 'Bulk Upload', icon: 'upload', adminOnly: true },
+  { name: 'bulk-retrieve', path: '/bulk-retrieve', label: 'Bulk Retrieve', icon: 'upload', adminOnly: true },
+];
+
+const navigationItems = computed(() => {
+  const items = [...baseNavigationItems];
+  
+  // Add admin-only items if user is admin
+  if (authStore.user?.email === 'admin@tspos.com') {
+    items.push(...adminNavigationItems);
+  }
+  
+  return items;
+});
 
 const logout = async () => {
   await authStore.logout();

@@ -133,10 +133,12 @@ Route::prefix('sales')->group(function () {
 // Public Collections route (temporary for testing)
 Route::apiResource('collections', CollectionController::class);
 Route::put('/collections/{collection}/discount', [CollectionController::class, 'updateDiscount']);
+Route::get('/collections-export', [CollectionController::class, 'export']);
 
 // Public Dresses route (temporary for testing)
 Route::apiResource('dresses', DressController::class);
 Route::put('/dresses/{dress}/discount', [DressController::class, 'updateDiscount']);
+Route::get('/dresses-export', [DressController::class, 'export']);
 
 // Protected routes (require authentication)
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -192,6 +194,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Reports
     Route::prefix('reports')->group(function () {
+        Route::get('/daily', [App\Http\Controllers\Api\ReportController::class, 'dailyReport']);
+        Route::get('/inventory', [App\Http\Controllers\Api\ReportController::class, 'inventoryReport']);
         Route::get('/sales', [App\Http\Controllers\Api\SalesReportController::class, 'index']);
         Route::get('/sales/export', [App\Http\Controllers\Api\SalesReportController::class, 'exportSales']);
         Route::get('/returns', [App\Http\Controllers\Api\ReturnsReportController::class, 'index']);
@@ -204,4 +208,24 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Discount Management
     Route::get('/discounts/active', [DressItemController::class, 'getActiveDiscounts']);
+
+    // Bulk Upload (Admin only)
+    Route::prefix('bulk-upload')->group(function () {
+        Route::post('/upload', [App\Http\Controllers\Api\BulkUploadController::class, 'upload']);
+        Route::get('/stats', [App\Http\Controllers\Api\BulkUploadController::class, 'stats']);
+        Route::get('/template', [App\Http\Controllers\Api\BulkUploadController::class, 'downloadTemplate']);
+    });
+
+    // Bulk Retrieve (Admin only)
+    Route::prefix('bulk-retrieve')->group(function () {
+        Route::post('/retrieve', [App\Http\Controllers\Api\BulkUploadController::class, 'bulkRetrieve']);
+        Route::get('/template', [App\Http\Controllers\Api\BulkUploadController::class, 'downloadRetrieveTemplate']);
+    });
+});
+
+// Barcode List (Public - outside auth middleware)
+Route::prefix('barcode-list')->group(function () {
+    Route::get('/', [App\Http\Controllers\Api\BarcodeListController::class, 'index']);
+    Route::get('/export', [App\Http\Controllers\Api\BarcodeListController::class, 'export']);
+    Route::get('/filter-options', [App\Http\Controllers\Api\BarcodeListController::class, 'filterOptions']);
 });
