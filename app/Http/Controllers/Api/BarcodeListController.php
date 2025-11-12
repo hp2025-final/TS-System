@@ -56,6 +56,7 @@ class BarcodeListController extends Controller
                     'sale_price' => $item->dress->sale_price,
                     'collection_name' => $item->dress->collection->name,
                     'dress_name' => $item->dress->name,
+                    'dress_sku' => $item->dress->sku,
                     'created_at' => $item->created_at->format('d-m-y'),
                     'updated_at' => $item->updated_at->format('d-m-y H:i'),
                     'sold_at' => $item->sold_at ? Carbon::parse($item->sold_at)->format('d-m-y') : null,
@@ -113,7 +114,8 @@ class BarcodeListController extends Controller
             'Date (Sold)',
             'Date (Returned)',
             'Collection',
-            'Dress'
+            'Dress',
+            'Dress SKU'
         ];
 
         $csvContent = implode(',', $headers) . "\n";
@@ -129,6 +131,7 @@ class BarcodeListController extends Controller
                 $item->returned_at ? Carbon::parse($item->returned_at)->format('d-m-y') : '',
                 $item->dress->collection->name,
                 $item->dress->name,
+                $item->dress->sku,
             ];
 
             // Escape commas and quotes in data

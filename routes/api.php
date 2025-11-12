@@ -221,6 +221,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/retrieve', [App\Http\Controllers\Api\BulkUploadController::class, 'bulkRetrieve']);
         Route::get('/template', [App\Http\Controllers\Api\BulkUploadController::class, 'downloadRetrieveTemplate']);
     });
+
+    // Database Backup (Admin only)
+    Route::get('/backup/download', [App\Http\Controllers\Api\BackupController::class, 'download']);
 });
 
 // Barcode List (Public - outside auth middleware)

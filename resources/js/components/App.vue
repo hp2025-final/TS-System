@@ -147,18 +147,19 @@ const getIcon = (iconName) => {
 const baseNavigationItems = [
   { name: 'dashboard', path: '/', label: 'Dashboard', icon: 'dashboard' },
   { name: 'pos', path: '/pos', label: 'Advanced POS', icon: 'pos' },
-  { name: 'collections', path: '/collections', label: 'Collections', icon: 'collections' },
-  { name: 'dresses', path: '/dresses', label: 'Dresses', icon: 'dresses' },
   { name: 'barcode-list', path: '/barcode-list', label: 'Barcode List', icon: 'inventory' },
+  { name: 'dresses', path: '/dresses', label: 'Dresses', icon: 'dresses' },
+  { name: 'collections', path: '/collections', label: 'Collections', icon: 'collections' },
   { name: 'barcode-sales-report', path: '/reports/barcode-sales', label: 'Barcode Sales Report', icon: 'reports' },
-  { name: 'barcode-returns-report', path: '/reports/barcode-returns', label: 'Barcode Returns Report', icon: 'returns' },
   { name: 'returns', path: '/returns', label: 'Returns', icon: 'returns' },
+  { name: 'barcode-returns-report', path: '/reports/barcode-returns', label: 'Barcode Returns Report', icon: 'returns' },
   { name: 'inventory', path: '/inventory', label: 'Inventory', icon: 'inventory' },
 ];
 
 const adminNavigationItems = [
   { name: 'bulk-upload', path: '/bulk-upload', label: 'Bulk Upload', icon: 'upload', adminOnly: true },
   { name: 'bulk-retrieve', path: '/bulk-retrieve', label: 'Bulk Retrieve', icon: 'upload', adminOnly: true },
+  { name: 'backup-database', path: '/backup', label: 'Backup Database', icon: 'inventory', adminOnly: true },
 ];
 
 const navigationItems = computed(() => {

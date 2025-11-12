@@ -113,6 +113,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date (Created)</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date (Updated)</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Barcode</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dress SKU</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sale Price</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date (Sold)</th>
@@ -121,7 +122,7 @@
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-if="items.length === 0">
-              <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
+              <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500">
                 No items found
               </td>
             </tr>
@@ -129,6 +130,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.created_at }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.updated_at }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ item.barcode }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.dress_sku }}</td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span :class="getStatusClass(item.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
                   {{ formatStatus(item.status) }}

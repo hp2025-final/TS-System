@@ -5,7 +5,7 @@ return [
     'company' => [
         'name' => 'Tasneem Shamim',
         'company_phone' => '+92 311 0607223',
-        'company_address' => 'B26, Dhedhi Business Avenue, SITE, Karachi',
+        'company_address' => 'B226, Dhedhi Business Avenue, SITE, Karachi',
         'email' => 'cs@tasneemshamim.com',
         'website' => 'www.tasneemshamim.com',
         'facebook' => 'tasneemshamim.pk',
@@ -15,7 +15,7 @@ return [
 
     // Branch Information
     'branch' => [
-        'name' => 'Gujranwala Branch',
+        'name' => 'Fazal Center Br',
         'phone' => '+92 313 6520007',
         'address' => 'Fazal Centre, Ground Floor, Main G.T Road, Gujranwala',
     ],

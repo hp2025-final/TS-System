@@ -1,0 +1,50 @@
+=== 080825 NEW INVENTORY IMPORT INSTRUCTIONS ===
+
+📋 IMPORTANT: Execute SQL files in this exact order:
+
+1. FIRST:  import_080825_collections.sql
+2. SECOND: import_080825_dresses.sql
+3. THIRD:  import_080825_dress_items.sql
+
+🔒 SAFETY FEATURES:
+✅ No existing data will be deleted
+✅ Uses INSERT IGNORE to prevent duplicates
+✅ Proper foreign key relationships maintained
+✅ Verification queries included in each file
+
+💾 BACKUP RECOMMENDATION:
+Before running, create a backup:
+mysqldump -u root -p tspos > backup_before_080825_2025-08-08_12-51-24.sql
+
+🖥️ EXECUTION METHODS:
+
+Method 1 - MySQL Command Line:
+mysql -u root -p tspos < import_080825_collections.sql
+mysql -u root -p tspos < import_080825_dresses.sql
+mysql -u root -p tspos < import_080825_dress_items.sql
+
+Method 2 - phpMyAdmin:
+1. Open phpMyAdmin
+2. Select 'tspos' database
+3. Go to 'Import' tab
+4. Upload and execute each SQL file in order
+
+📊 DATA SUMMARY:
+Collections: 12
+Dresses: 289
+Dress Items: 673
+Total Barcodes: 673
+
+🔍 COLLECTION BREAKDOWN:
+- TS.CO-ORDS: 64 dresses, 65 items (35% discount)
+- ZUMRA: 29 dresses, 29 items (25% discount)
+- TABEER: 71 dresses, 205 items (50% discount)
+- NASR-LAWN: 1 dresses, 54 items (45% discount)
+- CAMBRIC: 0 dresses, 0 items (45% discount)
+- ESSENTIAL: 19 dresses, 101 items (70% discount)
+- TS LUXURY: 4 dresses, 4 items (25% discount)
+- Unsorted: 5 dresses, 45 items (40% discount)
+- AMBER: 6 dresses, 49 items (50% discount)
+- NAZM 2: 9 dresses, 20 items (50% discount)
+- GHAZAL25: 75 dresses, 86 items (35% discount)
+- Palette: 6 dresses, 15 items (35% discount)

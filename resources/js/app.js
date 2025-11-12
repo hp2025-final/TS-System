@@ -17,6 +17,7 @@ import Returns from './components/returns/ReturnsPageNew.vue';
 import ResaleableItems from './components/inventory/ResaleableItemsPage.vue';
 import BulkUpload from './components/BulkUpload.vue';
 import BulkRetrieve from './components/BulkRetrieve.vue';
+import BackupDatabase from './components/BackupDatabase.vue';
 import BarcodeList from './components/BarcodeList.vue';
 
 // Import stores
@@ -88,6 +89,12 @@ const routes = [
         path: '/bulk-retrieve',
         name: 'bulk-retrieve',
         component: BulkRetrieve,
+        meta: { requiresAuth: true, adminOnly: true }
+    },
+    {
+        path: '/backup',
+        name: 'backup',
+        component: BackupDatabase,
         meta: { requiresAuth: true, adminOnly: true }
     },
     {
