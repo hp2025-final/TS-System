@@ -56,6 +56,7 @@ class BarcodeListController extends Controller
                     'sale_price' => $item->dress->sale_price,
                     'collection_name' => $item->dress->collection->name,
                     'dress_name' => $item->dress->name,
+                    'size' => $item->dress->size,
                     'dress_sku' => $item->dress->sku,
                     'created_at' => $item->created_at->format('d-m-y'),
                     'updated_at' => $item->updated_at->format('d-m-y H:i'),
@@ -109,12 +110,13 @@ class BarcodeListController extends Controller
             'Date (Created)',
             'Date (Updated)',
             'Barcode',
+            'Collection',
+            'Dress',
+            'Size',
             'Status',
             'Sale Price',
             'Date (Sold)',
             'Date (Returned)',
-            'Collection',
-            'Dress',
             'Dress SKU'
         ];
 
@@ -125,12 +127,13 @@ class BarcodeListController extends Controller
                 $item->created_at->format('d-m-y'),
                 $item->updated_at->format('d-m-y H:i'),
                 $item->barcode,
+                $item->dress->collection->name,
+                $item->dress->name,
+                $item->dress->size,
                 $item->status,
                 $item->dress->sale_price,
                 $item->sold_at ? Carbon::parse($item->sold_at)->format('d-m-y') : '',
                 $item->returned_at ? Carbon::parse($item->returned_at)->format('d-m-y') : '',
-                $item->dress->collection->name,
-                $item->dress->name,
                 $item->dress->sku,
             ];
 
