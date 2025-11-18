@@ -83,7 +83,7 @@
         <h3 class="text-sm font-semibold text-blue-900 mb-2">CSV File Format</h3>
         <p class="text-sm text-blue-800 mb-2">Your CSV file must have the following columns in this exact order:</p>
         <div class="bg-white rounded p-3 font-mono text-xs overflow-x-auto">
-          <code>Collection_Name, Dress_Name, SKU, Dress_Item_Barcode, Cost_Price, Sale_Price, Collection_Discount_%, Dress_Discount_%, Dress_Item_Discount_%</code>
+          <code>Collection_Name, Dress_Name, Size, SKU, Dress_Item_Barcode, Cost_Price, Sale_Price, Collection_Discount_%, Dress_Discount_%, Dress_Item_Discount_%</code>
         </div>
         <div class="mt-3">
           <button

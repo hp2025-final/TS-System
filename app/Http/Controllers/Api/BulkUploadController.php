@@ -44,6 +44,7 @@ class BulkUploadController extends Controller
         $expectedHeaders = [
             'Collection_Name',
             'Dress_Name',
+            'Size',
             'SKU',
             'Dress_Item_Barcode',
             'Cost_Price',
@@ -90,17 +91,42 @@ class BulkUploadController extends Controller
                     // Parse row data
                     $collectionName = trim($row[0]);
                     $dressName = trim($row[1]);
-                    $sku = trim($row[2]);
-                    $barcode = trim($row[3]);
-                    $costPrice = floatval($row[4]);
-                    $salePrice = floatval($row[5]);
-                    $collectionDiscount = floatval($row[6] ?? 0);
-                    $dressDiscount = floatval($row[7] ?? 0);
-                    $dressItemDiscount = floatval($row[8] ?? 0);
+                    $sizeRaw = trim($row[2]);
+                    $sku = trim($row[3]);
+                    $barcode = trim($row[4]);
+                    $costPrice = floatval($row[5]);
+                    $salePrice = floatval($row[6]);
+                    $collectionDiscount = floatval($row[7] ?? 0);
+                    $dressDiscount = floatval($row[8] ?? 0);
+                    $dressItemDiscount = floatval($row[9] ?? 0);
+
+                    // Normalize and validate size
+                    $normalizedSize = null;
+                    if ($sizeRaw === '' || $sizeRaw === null) {
+                        $normalizedSize = 'unstitched';
+                    } else {
+                        $sizeLower = strtolower($sizeRaw);
+                        $map = [
+                            'xs' => 'XS',
+                            's' => 'S',
+                            'm' => 'M',
+                            'l' => 'L',
+                            'xl' => 'XL',
+                            'unstitched' => 'unstitched',
+                        ];
+                        $normalizedSize = $map[$sizeLower] ?? null;
+                    }
 
                     // Validate required fields
                     if (empty($collectionName) || empty($dressName) || empty($sku) || empty($barcode)) {
-                        $results['errors'][] = "Row {$rowNumber}: Missing required fields (Collection_Name, Dress_Name, SKU, or Barcode)";
+                        $results['errors'][] = "Row {$rowNumber}: Missing required fields (Collection_Name, Dress_Name, Size, SKU, or Barcode)";
+                        $results['failed']++;
+                        continue;
+                    }
+
+                    // Validate size
+                    if ($normalizedSize === null) {
+                        $results['errors'][] = "Row {$rowNumber}: Invalid Size '{$sizeRaw}'. Allowed: XS, S, M, L, XL, unstitched";
                         $results['failed']++;
                         continue;
                     }
@@ -152,7 +178,7 @@ class BulkUploadController extends Controller
                         [
                             'name' => $dressName,
                             'description' => null,
-                            'size' => 'unstitched',
+                            'size' => $normalizedSize,
                             'hs_code' => null,
                             'cost_price' => $costPrice,
                             'sale_price' => $salePrice,
@@ -177,6 +203,9 @@ class BulkUploadController extends Controller
                         if ($dressDiscount > 0 && $dress->discount_percentage != $dressDiscount) {
                             $updateData['discount_percentage'] = $dressDiscount;
                             $updateData['discount_active'] = 1;
+                        }
+                        if ($dress->size !== $normalizedSize) {
+                            $updateData['size'] = $normalizedSize;
                         }
                         
                         if (!empty($updateData)) {
@@ -252,6 +281,7 @@ class BulkUploadController extends Controller
         $headers = [
             'Collection_Name',
             'Dress_Name',
+            'Size',
             'SKU',
             'Dress_Item_Barcode',
             'Cost_Price',
@@ -262,9 +292,9 @@ class BulkUploadController extends Controller
         ];
 
         $sampleData = [
-            ['Summer Collection', 'Floral Dress', 'SKU-FL001', 'BC001', '1500', '2500', '10', '5', '0'],
-            ['Summer Collection', 'Floral Dress', 'SKU-FL001', 'BC002', '1500', '2500', '10', '5', '0'],
-            ['Winter Collection', 'Wool Coat', 'SKU-WC001', 'BC003', '3000', '5000', '15', '0', '5'],
+            ['Summer Collection', 'Floral Dress', 'M', 'SKU-FL001', 'BC001', '1500', '2500', '10', '5', '0'],
+            ['Summer Collection', 'Floral Dress', 'L', 'SKU-FL001', 'BC002', '1500', '2500', '10', '5', '0'],
+            ['Winter Collection', 'Wool Coat', 'XL', 'SKU-WC001', 'BC003', '3000', '5000', '15', '0', '5'],
         ];
 
         $csvContent = implode(',', $headers) . "\n";
