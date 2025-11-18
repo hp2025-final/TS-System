@@ -115,6 +115,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Barcode</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Collection</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dress</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dress Description</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dress SKU</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -125,7 +126,7 @@
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-if="items.length === 0">
-              <td colspan="11" class="px-6 py-12 text-center text-sm text-gray-500">
+              <td colspan="12" class="px-6 py-12 text-center text-sm text-gray-500">
                 No items found
               </td>
             </tr>
@@ -135,6 +136,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ item.barcode }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.collection_name }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.dress_name }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.dress_description || '-' }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.size }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.dress_sku }}</td>
               <td class="px-6 py-4 whitespace-nowrap">
