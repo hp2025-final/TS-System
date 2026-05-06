@@ -9,7 +9,9 @@
     },
     "dependencies": {
         "@zxing/library": "^0.20.0",
+        "jspdf": "^4.2.1",
         "pinia": "^2.1.0",
+        "qrcode": "^1.5.4",
         "quagga": "^0.12.1",
         "vue": "^3.4.0",
         "vue-router": "^4.2.0"

@@ -19,6 +19,7 @@ import BulkUpload from './components/BulkUpload.vue';
 import BulkRetrieve from './components/BulkRetrieve.vue';
 import BackupDatabase from './components/BackupDatabase.vue';
 import BarcodeList from './components/BarcodeList.vue';
+import QrStickerGenerator from './components/QrStickerGenerator.vue';
 
 // Import stores
 import { useAuthStore } from './stores/auth';
@@ -102,6 +103,12 @@ const routes = [
         name: 'barcode-list',
         component: BarcodeList,
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/qr-stickers',
+        name: 'qr-stickers',
+        component: QrStickerGenerator,
+        meta: { requiresAuth: true, adminOnly: true }
     }
 ];
 

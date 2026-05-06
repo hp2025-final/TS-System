@@ -15,9 +15,9 @@ return [
 
     // Branch Information
     'branch' => [
-        'name' => 'Fazal Center Br',
-        'phone' => '+92 313 6520007',
-        'address' => 'Fazal Centre, Ground Floor, Main G.T Road, Gujranwala',
+        'name' => 'Fazal Center Branch.',
+        'phone' => '+92 344 8664538',
+        'address' => 'Shop# 60, Fazal Center, Gujranwala, Pakistan',
     ],
 
     // Invoice Settings

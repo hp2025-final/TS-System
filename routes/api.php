@@ -224,6 +224,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Database Backup (Admin only)
     Route::get('/backup/download', [App\Http\Controllers\Api\BackupController::class, 'download']);
+
+    // QR Sticker Generator (Admin only)
+    Route::prefix('qr-stickers')->group(function () {
+        Route::post('/upload', [App\Http\Controllers\Api\QrStickerController::class, 'upload']);
+        Route::get('/template', [App\Http\Controllers\Api\QrStickerController::class, 'downloadTemplate']);
+    });
 });
 
 // Barcode List (Public - outside auth middleware)

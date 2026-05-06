@@ -159,6 +159,7 @@ const baseNavigationItems = [
 const adminNavigationItems = [
   { name: 'bulk-upload', path: '/bulk-upload', label: 'Bulk Upload', icon: 'upload', adminOnly: true },
   { name: 'bulk-retrieve', path: '/bulk-retrieve', label: 'Bulk Retrieve', icon: 'upload', adminOnly: true },
+  { name: 'qr-stickers', path: '/qr-stickers', label: 'QR Stickers', icon: 'inventory', adminOnly: true },
   { name: 'backup-database', path: '/backup', label: 'Backup Database', icon: 'inventory', adminOnly: true },
 ];
 
