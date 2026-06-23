@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\DressController;
 use App\Http\Controllers\Api\DressItemController;
 use App\Http\Controllers\Api\CollectionController;
 use App\Http\Controllers\Api\ReturnController;
+use App\Http\Controllers\Api\AuditController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -229,6 +230,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('qr-stickers')->group(function () {
         Route::post('/upload', [App\Http\Controllers\Api\QrStickerController::class, 'upload']);
         Route::get('/template', [App\Http\Controllers\Api\QrStickerController::class, 'downloadTemplate']);
+    });
+
+    // Audit Routes - QR Scanning for inventory audit
+    Route::prefix('audit')->group(function () {
+        Route::post('/scan', [AuditController::class, 'scan']);
+        Route::get('/', [AuditController::class, 'index']);
+        Route::get('/stats', [AuditController::class, 'stats']);
+        Route::get('/recent', [AuditController::class, 'recent']);
+        Route::get('/export', [AuditController::class, 'export']);
+        Route::delete('/{audit}', [AuditController::class, 'destroy']);
     });
 });
 

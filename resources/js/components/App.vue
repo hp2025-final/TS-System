@@ -147,6 +147,7 @@ const getIcon = (iconName) => {
 const baseNavigationItems = [
   { name: 'dashboard', path: '/', label: 'Dashboard', icon: 'dashboard' },
   { name: 'pos', path: '/pos', label: 'Advanced POS', icon: 'pos' },
+  { name: 'audit', path: '/audit', label: 'Audit', icon: 'inventory' },
   { name: 'barcode-list', path: '/barcode-list', label: 'Barcode List', icon: 'inventory' },
   { name: 'dresses', path: '/dresses', label: 'Dresses', icon: 'dresses' },
   { name: 'collections', path: '/collections', label: 'Collections', icon: 'collections' },

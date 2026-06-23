@@ -20,6 +20,7 @@ import BulkRetrieve from './components/BulkRetrieve.vue';
 import BackupDatabase from './components/BackupDatabase.vue';
 import BarcodeList from './components/BarcodeList.vue';
 import QrStickerGenerator from './components/QrStickerGenerator.vue';
+import AuditPage from './components/AuditPage.vue';
 
 // Import stores
 import { useAuthStore } from './stores/auth';
@@ -109,6 +110,12 @@ const routes = [
         name: 'qr-stickers',
         component: QrStickerGenerator,
         meta: { requiresAuth: true, adminOnly: true }
+    },
+    {
+        path: '/audit',
+        name: 'audit',
+        component: AuditPage,
+        meta: { requiresAuth: true }
     }
 ];
 
