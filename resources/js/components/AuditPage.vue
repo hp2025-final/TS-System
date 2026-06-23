@@ -677,10 +677,6 @@ const playErrorSound = () => {
 </script>
 
 <style scoped>
-video {
-  transform: scaleX(-1);
-}
-
 @keyframes fade-in {
   from {
     opacity: 0;
